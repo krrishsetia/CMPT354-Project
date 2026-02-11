@@ -211,6 +211,33 @@
         <mxCell id="tP6TlnTbc0nNI496r404-27" parent="1" style="whiteSpace=wrap;html=1;align=center;" value="suspension" vertex="1">
           <mxGeometry height="40" width="100" x="285" y="1020" as="geometry" />
         </mxCell>
+        <mxCell id="ay-UfqCrTRtDKMp-ooSn-1" edge="1" parent="1" source="ay-UfqCrTRtDKMp-ooSn-3" style="endArrow=none;html=1;rounded=0;" target="lnECB7EyRE4XW3rOr3zA-4" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="270" y="1120" as="sourcePoint" />
+            <mxPoint x="370" y="1080" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="ay-UfqCrTRtDKMp-ooSn-2" edge="1" parent="1" source="ay-UfqCrTRtDKMp-ooSn-4" style="endArrow=none;html=1;rounded=0;" target="tP6TlnTbc0nNI496r404-27" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="430" y="1130" as="sourcePoint" />
+            <mxPoint x="480" y="1080" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="ay-UfqCrTRtDKMp-ooSn-3" parent="1" style="ellipse;whiteSpace=wrap;html=1;align=center;" value="Size" vertex="1">
+          <mxGeometry height="40" width="100" x="100" y="920" as="geometry" />
+        </mxCell>
+        <mxCell id="ay-UfqCrTRtDKMp-ooSn-4" parent="1" style="ellipse;whiteSpace=wrap;html=1;align=center;" value="Weight limit" vertex="1">
+          <mxGeometry height="40" width="100" x="285" y="1070" as="geometry" />
+        </mxCell>
+        <mxCell id="ay-UfqCrTRtDKMp-ooSn-6" edge="1" parent="1" source="ay-UfqCrTRtDKMp-ooSn-8" style="endArrow=none;html=1;rounded=0;" target="tP6TlnTbc0nNI496r404-24" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="-60" y="1090" as="sourcePoint" />
+            <mxPoint x="-10" y="1040" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="ay-UfqCrTRtDKMp-ooSn-8" parent="1" style="ellipse;whiteSpace=wrap;html=1;align=center;" value="Type (omni or regular)" vertex="1">
+          <mxGeometry height="40" width="100" x="90" y="1070" as="geometry" />
+        </mxCell>
       </root>
     </mxGraphModel>
   </diagram>
