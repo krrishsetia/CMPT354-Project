@@ -28,4 +28,68 @@ CREATE TABLE "Sub-Assembly"(
 	foreign key (RobotID) references Robot(RobotID)
 
 );
+
+CREATE TABLE Part(
+	PartID int IDENTITY(1,1) primary key,
+	PartName varchar(100) not null unique,
+	"Weight" int not null,
+	Height int not null,
+	"Length" int not null,
+	Width int not null,
+
+);
+
+CREATE TABLE Structural(
+	PartID int,
+	Material varchar(100),
+	"Type" varchar(50),
+	foreign key (PartID) references Part(PartID)
+
+);
+
+CREATE TABLE Electronic(
+	PartID int,
+	MaxCurrentA int,
+	MaxVoltageV int,
+	foreign key (PartID) references Part(PartID)
+
+);
+
+CREATE TABLE Battery(
+	PartID int,
+	CapacitymAh int,
+	foreign key (PartID) references Electronic(PartID)
+
+);
+
+CREATE TABLE Mechanical(
+	PartID int,
+	foreign key (PartID) references Part(PartID)
+
+);
+
+CREATE TABLE Wheel(
+	PartID int,
+	Radius int,
+	"Type" varchar(50),
+	foreign key (PartID) references Mechanical(PartID)
+
+);
+
+CREATE TABLE Motor(
+	PartID int,
+	Torque int,
+	foreign key (PartID) references Mechanical(PartID)
+
+);
+
+CREATE TABLE Suspension(
+	PartID int,
+	WeightLimit int,
+	foreign key (PartID) references Mechanical(PartID)
+
+);
+
+
+
 GO
