@@ -1,15 +1,5 @@
-import pyodbc
+"""Convenience entry point for the checkpoint demo frontend."""
+from app import run_server
 
-conn = pyodbc.connect(
-'driver={ODBC Driver 18 for SQL Server};'
-'server=cypress.csil.sfu.ca;'
-'uid=s_ksa287;'
-'pwd=N3PbfL72nE4nrRdQ;'
-'database=ksa287354;'
-'TrustServerCertificate=yes;'
-)
-cursor = conn.cursor()
-cursor.execute('SELECT * FROM dbo.yourTable')
-for row in cursor:
-    print(row)
-conn.close()
+if __name__ == '__main__':
+    run_server()
