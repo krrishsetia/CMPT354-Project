@@ -30,7 +30,7 @@ CREATE TABLE "Sub-Assembly"(
 );
 
 CREATE TABLE Part(
-	PartID int IDENTITY(1,1) primary key,
+	PartID int primary key,
 	PartName varchar(100) not null unique,
 	"Weight" int not null,
 	Height int not null,
@@ -40,7 +40,7 @@ CREATE TABLE Part(
 );
 
 CREATE TABLE Structural(
-	PartID int,
+	PartID int primary key,
 	Material varchar(100),
 	"Type" varchar(50),
 	foreign key (PartID) references Part(PartID)
@@ -48,7 +48,7 @@ CREATE TABLE Structural(
 );
 
 CREATE TABLE Electronic(
-	PartID int,
+	PartID int primary key,
 	MaxCurrentA int,
 	MaxVoltageV int,
 	foreign key (PartID) references Part(PartID)
@@ -63,13 +63,13 @@ CREATE TABLE Battery(
 );
 
 CREATE TABLE Mechanical(
-	PartID int,
+	PartID int primary key,
 	foreign key (PartID) references Part(PartID)
 
 );
 
 CREATE TABLE Wheel(
-	PartID int,
+	PartID int primary key,
 	Radius int,
 	"Type" varchar(50),
 	foreign key (PartID) references Mechanical(PartID)
@@ -77,19 +77,37 @@ CREATE TABLE Wheel(
 );
 
 CREATE TABLE Motor(
-	PartID int,
+	PartID int primary key,
 	Torque int,
 	foreign key (PartID) references Mechanical(PartID)
 
 );
 
 CREATE TABLE Suspension(
-	PartID int,
+	PartID int primary key,
 	WeightLimit int,
 	foreign key (PartID) references Mechanical(PartID)
 
 );
 
+CREATE TABLE "Sub-Assembly-Parts"(
+	SATypeID int,
+	PartID int,
+	primary key (SATypeID, PartID),
+	foreign key (SATypeID) references "Sub-Assembly"(SATypeID),
+	foreign key (PartID) references Part(PartID)
+);
+
+CREATE TABLE "Sub-Assembly-Heirarchy"(
+	ParentSATypeID int,
+	ChildPartID int,
+	primary key (ParentSATypeID, ChildPartID),
+	foreign key (ParentSATypeID) references "Sub-Assembly"(SATypeID),
+	foreign key (ChildPartID) references "Sub-Assembly"(SATypeID)
+);
 
 
+INSERT INTO Robot VALUES ('0','dog'),('1','car'),('2','arm'),('3','spider'),('4','VEX'),('5','FTC');
+INSERT INTO Team VALUES ('DogTeam','0'),('CarTeam','1'),('ArmTeam','2'),('SpiderTeam','3'),('VEXTeam','4'),('FTCTeam','5');
+INSERT INTO TeamManagers VALUES ('John','DogTeam','0'),('Brendan','CarTeam','1'),('Godwin','ArmTeam','2'),('Daniel','SpiderTeam','3'),('Eliana','VEXTeam','4'),('Matthew','FTCTeam','5');
 GO
