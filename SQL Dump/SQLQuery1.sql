@@ -1,7 +1,3 @@
--- Minimal MySQL-compatible revision of the original SQLQuery1.sql
--- Goal: preserve the original structure, naming intent, and sample data as much as possible
--- while making the script executable and aligned with the PDF schema.
-
 SET FOREIGN_KEY_CHECKS = 0;
 DROP TABLE IF EXISTS ProgressUpdates;
 DROP TABLE IF EXISTS TeamMember;
@@ -41,8 +37,6 @@ CREATE TABLE TeamManagers(
     FOREIGN KEY (RobotID, TeamName) REFERENCES Team(RobotID,TeamName)
 );
 
--- PDF includes TeamMember and ProgressUpdates.
--- TeamMember uses (RobotID, TeamName) to correctly reference Team's composite key.
 CREATE TABLE TeamMember(
     ID INT PRIMARY KEY,
     Name VARCHAR(50) NOT NULL,
@@ -73,10 +67,10 @@ CREATE TABLE `Sub-Assembly`(
 CREATE TABLE Part(
     PartID INT PRIMARY KEY,
     PartName VARCHAR(100) NOT NULL UNIQUE,
-    `Weight` INT NOT NULL,
-    Height INT NOT NULL,
-    `Length` INT NOT NULL,
-    Width INT NOT NULL
+    `Weight` FLOAT NOT NULL,
+    Height FLOAT NOT NULL,
+    `Length` FLOAT NOT NULL,
+    Width FLOAT NOT NULL
 );
 
 CREATE TABLE Structural(
@@ -88,14 +82,14 @@ CREATE TABLE Structural(
 
 CREATE TABLE Electronic(
     PartID INT PRIMARY KEY,
-    MaxCurrentA INT,
-    MaxVoltageV INT,
+    MaxCurrentA FLOAT,
+    MaxVoltageV FLOAT,
     FOREIGN KEY (PartID) REFERENCES Part(PartID)
 );
 
 CREATE TABLE Battery(
     PartID INT PRIMARY KEY,
-    CapacitymAh INT,
+    CapacitymAh FLOAT,
     FOREIGN KEY (PartID) REFERENCES Electronic(PartID)
 );
 
@@ -106,20 +100,20 @@ CREATE TABLE Mechanical(
 
 CREATE TABLE Wheel(
     PartID INT PRIMARY KEY,
-    Radius INT,
+    Radius FLOAT,
     `Type` VARCHAR(50),
     FOREIGN KEY (PartID) REFERENCES Mechanical(PartID)
 );
 
 CREATE TABLE Motor(
     PartID INT PRIMARY KEY,
-    Torque INT,
+    Torque FLOAT,
     FOREIGN KEY (PartID) REFERENCES Mechanical(PartID)
 );
 
 CREATE TABLE Suspension(
     PartID INT PRIMARY KEY,
-    WeightLimit INT,
+    WeightLimit FLOAT,
     FOREIGN KEY (PartID) REFERENCES Mechanical(PartID)
 );
 
