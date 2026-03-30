@@ -114,6 +114,12 @@ while True:
             Length = float(input("Length: "))
             Height = float(input("Height: "))
             Width  = float(input("Width : "))
+            
+            cursor.execute(f"""INSERT INTO {selection}
+                           (PartID, PartName, `Weight`, 
+                           Height, `Length`, Width) VALUES  
+                           (?,?,?,?,?,?)""",
+                           Id,Name,Weight,Length,Height,Width)
             #this will be a list of all types when we make a gui
             print(f"""
                 types:
@@ -129,21 +135,41 @@ while True:
             if Type == 1 and Type == 2:
                 MaxVoltageV = float(input("Max Voltage: "))
                 MaxCurrentA = float(input("Max Current: "))
+                
+                cursor.execute(f"""INSERT INTO Electronic
+                        (PartID, MaxCurrentA,MaxVoltageV) VALUES  
+                        (?,?,?)""",
+                        Id,MaxCurrentA,MaxVoltageV)
                 if Type == 2:
                     CapacitymAh = float(input("Capacity: "))
                     
-                    cursor.execute(f"""INSERT INTO {Type}
-                           (SATypeID, SAName, `Version`, 
-                           SAClassification, RobotID) VALUES  
-                           (?,?,?,?,?)""",
-                           Id,Name,Version,SAClassification,RobotId)
+                    cursor.execute(f"""INSERT INTO Battery
+                           (PartID, CapacitymAh) VALUES  
+                           (?,?)""",
+                           Id,CapacitymAh)
+            if Type == 3 and Type == 4 and Type == 5:
+                cursor.execute(f"""INSERT INTO Mechanical
+                            (PartID) VALUES  (?)""", Id)
+                if Type == 3:
+                    Radius = float(input("Radius: "))
+                    WheelType = input("Wheel Type: ")
                     
-            
-            cursor.execute(f"""INSERT INTO {selection}
-                           (SATypeID, SAName, `Version`, 
-                           SAClassification, RobotID) VALUES  
-                           (?,?,?,?,?)""",
-                           Id,Name,Version,SAClassification,RobotId)
+                    cursor.execute(f"""INSERT INTO Wheel
+                            (PartID, Radius, `Type`) VALUES 
+                            (?,?,?)""", Id,Radius,WheelType)
+                if Type == 4:
+                    Torque = float(input("Torque: "))
+                    
+                    cursor.execute(f"""INSERT INTO Motor
+                            (PartID, Torque) VALUES 
+                            (?,?)""", Id,Torque)
+                
+                if Type == 5:
+                    WeightLimit = float(input("WeightLimit: "))
+                    
+                    cursor.execute(f"""INSERT INTO Suspension
+                            (PartID, WeightLimit) VALUES 
+                            (?,?)""", Id,WeightLimit)
         elif choice == 2:
             selection = "`Sub-Assembly`"
             Id = int(input("ID: "))
