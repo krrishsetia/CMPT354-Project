@@ -25,6 +25,26 @@ def get_mysql_connection(host, user, password, database):
         print(f"Error: {e}")
         return None
 
+
+#a list of all Tables for the 
+table_list = [
+"battery",
+"electronic",
+"mechanical",
+"motor",
+"part",
+"progressupdates",
+"robot",
+"structural",
+"`Sub-Assembly`",
+"`Sub-Assembly-Hierarchy`",
+"`Sub-Assembly-Parts`",
+"suspension",
+"team",
+"teammanagers",
+"teammember",
+"wheel",]
+
 # Usage
 conn = get_mysql_connection('localhost', 'root', '1925', 'test')
 
@@ -37,19 +57,24 @@ rows = cursor.fetchall()
 for row in rows:
     print(row)"""
     
+# a way to check inputs
+def input_auth(input,table):
+    if input.lower() in table:
+        return input.lower()
     
-
-
+# this while loop will be different in the final product
 while True:
+    # the options will be buttons
     print(f"""
       0. to exit
       1. to print all tables
       2. to print specific table
-      3. update table
+      3. add a robot, part or subassembly
       
       """)
+    # they will just click on the button
     user = int(input("what do you want do to: "))
-    
+    # each if statement would lead to a new different screen
     if user == 0:
         conn.close()
         break
@@ -58,12 +83,95 @@ while True:
         cursor.execute("SHOW TABLES")
         rows = cursor.fetchall()
         for row in rows:
-            print(row)
+            print(row[0])
     
     if user == 2:
         table = input("which table: ")
         cursor.execute(f"""SELECT * 
-                           From ? """,table)
+                           From {table} """)
+        rows = cursor.fetchall()
+        for row in rows:
+            print(row)
+            
+    if user == 3:
+        print(f"""
+      0. to exit
+      1. add a part
+      2. add a sub-assembly
+      3. add a robot
+      """)
+        selection = ""
+        choice = int(input("what do you want do to: "))
+        if choice == 0:
+            pass
+        elif choice == 1:
+            #part is going to need to be overhauled
+            selection = 'part'
+            
+            Id = int(input("ID: "))
+            Name = input("Name: ")
+            Weight = float(input("Weight: "))
+            Length = float(input("Length: "))
+            Height = float(input("Height: "))
+            Width  = float(input("Width : "))
+            #this will be a list of all types when we make a gui
+            print(f"""
+                types:
+                1. Electronic
+                2. Battery
+                3. Wheel
+                4. Motor
+                5. Suspension
+                6. Structural
+                """)
+            Type = int(input("SubType: "))
+            
+            if Type == 1 and Type == 2:
+                MaxVoltageV = float(input("Max Voltage: "))
+                MaxCurrentA = float(input("Max Current: "))
+                if Type == 2:
+                    CapacitymAh = float(input("Capacity: "))
+                    
+                    cursor.execute(f"""INSERT INTO {Type}
+                           (SATypeID, SAName, `Version`, 
+                           SAClassification, RobotID) VALUES  
+                           (?,?,?,?,?)""",
+                           Id,Name,Version,SAClassification,RobotId)
+                    
+            
+            cursor.execute(f"""INSERT INTO {selection}
+                           (SATypeID, SAName, `Version`, 
+                           SAClassification, RobotID) VALUES  
+                           (?,?,?,?,?)""",
+                           Id,Name,Version,SAClassification,RobotId)
+        elif choice == 2:
+            selection = "`Sub-Assembly`"
+            Id = int(input("ID: "))
+            Name = input("Name: ")
+            Version = int(input("Version: "))
+            SAClassification = input("Classification: ")
+            #this will be a list of all robots when we make a gui
+            RobotId = int(input("RobotID: "))
+            
+            cursor.execute(f"""INSERT INTO {selection}
+                           (SATypeID, SAName, `Version`, 
+                           SAClassification, RobotID) VALUES  
+                           (?,?,?,?,?)""",
+                           Id,Name,Version,SAClassification,RobotId)
+            
+        elif choice == 3:
+            selection = 'robot'
+            
+            Id = int(input("ID: "))
+            Name = input("Name: ")
+            cursor.execute(f"""INSERT INTO {selection}
+                           (RobotID, RobotName) VALUES  
+                           (?,?)""",
+                           Id,Name)
+            
+        # test code to see if it actually added the tuple    
+        cursor.execute(f"""SELECT * 
+                           From {selection} """)
         rows = cursor.fetchall()
         for row in rows:
             print(row)
