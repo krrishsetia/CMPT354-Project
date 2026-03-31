@@ -209,6 +209,7 @@ while True:
       1. modify a part
       2. modify a sub-assembly
       3. modify a robot
+      (you cannot modify the ID of anything)
       """)
         selection = ""
         choice = int(input("what do you want do to: "))
@@ -270,55 +271,64 @@ while True:
                             (?,?)""", Id,WeightLimit)
         elif choice == 2:
             selection = "`Sub-Assembly`"
-            Id = int(input("ID: "))
-            Name = input("Name: ")
-            Version = int(input("Version: "))
-            SAClassification = input("Classification: ")
-            #this will be a list of all robots when we make a gui
-            RobotId = int(input("RobotID: "))
             
-            cursor.execute(f"""INSERT INTO {selection}
-                           (SATypeID, SAName, `Version`, 
-                           SAClassification, RobotID) VALUES  
-                           (?,?,?,?,?)""",
-                           Id,Name,Version,SAClassification,RobotId)
-            
-        elif choice == 3:
-            selection = 'robot'
-            # this will be a list of all the robots and they select one and they will be able 
             print(f"""
-                Input the properties of the robot you wish to modify
-                1. ID
-                2. Name
-                3. Both
+                Input the property of the Sub-Assembly you wish to modify
+                1. Name
+                2. Version
+                3. Classification
+                4. RobotID
                 """)
             property = int(input("properties: "))
             
             print(f"""
-                Input the ID of the robot you wish to modify
+                Input the ID of the Sub-Assembly you wish to modify
                 """)
             
             Id = int(input("ID: "))
             
             if property == 1:
-                newID = int(input("New ID: "))
-                cursor.execute(f"""UPDATE Robot
-                               SET RobotID = ?  
-                            WHERE RobotID = ?""",
-                            newID,Id)
-            elif property == 2:
                 newName = input("New Name: ")
-                cursor.execute(f"""UPDATE Robot
-                               SET RobotName = ?  
-                            WHERE RobotID = ?""",
+                cursor.execute(f"""UPDATE `Sub-Assembly`
+                               SET SAName = ?  
+                            WHERE SATypeID = ?""",
                             newName,Id)
+            elif property == 2:
+                newVersion = int(input("New Version: "))
+                cursor.execute(f"""UPDATE `Sub-Assembly`
+                            SET `Version` = ?
+                            WHERE SATypeID = ?""",
+                            newVersion,Id)
             elif property == 3:
-                newID = int(input("New ID: "))
-                newName = input("New Name: ")
-                cursor.execute(f"""UPDATE Robot
-                            SET RobotName = ? AND RobotID = ? 
-                            WHERE RobotID = ?""",
-                            newID,newName,Id)
+                newClassification = input("New SAClassification: ")
+                cursor.execute(f"""UPDATE `Sub-Assembly`
+                            SET SAClassification = ?
+                            WHERE SATypeID = ?""",
+                            newClassification,Id)
+            elif property == 4:
+                newRobotId = int(input("New RobotId: "))
+                cursor.execute(f"""UPDATE `Sub-Assembly`
+                            SET RobotID = ?
+                            WHERE SATypeID = ?""",
+                            newRobotId,Id)
+                
+            
+        elif choice == 3:
+            selection = 'robot'
+            # this will be a list of all the robots and they select one and they will be able 
+            
+            print(f"""
+                Input the ID of the robot whose name you wish to modify
+                
+                """)
+            
+            Id = int(input("ID: "))
+
+            newName = input("New Name: ")
+            cursor.execute(f"""UPDATE Robot
+                            SET RobotName = ?  
+                        WHERE RobotID = ?""",
+                        newName,Id)
             
         # test code to see if it actually added the tuple    
         cursor.execute(f"""SELECT * 
