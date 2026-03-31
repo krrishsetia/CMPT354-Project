@@ -70,6 +70,7 @@ while True:
       1. to print all tables
       2. to print specific table
       3. add a robot, part or subassembly
+      4. update a robot, part or subassembly
       
       """)
     # they will just click on the button
@@ -194,6 +195,130 @@ while True:
                            (RobotID, RobotName) VALUES  
                            (?,?)""",
                            Id,Name)
+            
+        # test code to see if it actually added the tuple    
+        cursor.execute(f"""SELECT * 
+                           From {selection} """)
+        rows = cursor.fetchall()
+        for row in rows:
+            print(row)
+        
+    if user == 4:
+        print(f"""
+      0. to exit
+      1. modify a part
+      2. modify a sub-assembly
+      3. modify a robot
+      """)
+        selection = ""
+        choice = int(input("what do you want do to: "))
+        if choice == 0:
+            pass
+        elif choice == 1:
+            #part is going to need to be overhauled
+            selection = 'part'
+            
+            #this will be a list of all types when we make a gui
+            print(f"""
+                types:
+                1. Electronic
+                2. Battery
+                3. Wheel
+                4. Motor
+                5. Suspension
+                6. Structural
+                """)
+            Type = int(input("SubType: "))
+            
+            if Type == 1 and Type == 2:
+                MaxVoltageV = float(input("Max Voltage: "))
+                MaxCurrentA = float(input("Max Current: "))
+                
+                cursor.execute(f"""INSERT INTO Electronic
+                        (PartID, MaxCurrentA,MaxVoltageV) VALUES  
+                        (?,?,?)""",
+                        Id,MaxCurrentA,MaxVoltageV)
+                if Type == 2:
+                    CapacitymAh = float(input("Capacity: "))
+                    
+                    cursor.execute(f"""INSERT INTO Battery
+                           (PartID, CapacitymAh) VALUES  
+                           (?,?)""",
+                           Id,CapacitymAh)
+            elif Type == 3 and Type == 4 and Type == 5:
+                cursor.execute(f"""INSERT INTO Mechanical
+                            (PartID) VALUES  (?)""", Id)
+                if Type == 3:
+                    Radius = float(input("Radius: "))
+                    WheelType = input("Wheel Type: ")
+                    
+                    cursor.execute(f"""INSERT INTO Wheel
+                            (PartID, Radius, `Type`) VALUES 
+                            (?,?,?)""", Id,Radius,WheelType)
+                elif Type == 4:
+                    Torque = float(input("Torque: "))
+                    
+                    cursor.execute(f"""INSERT INTO Motor
+                            (PartID, Torque) VALUES 
+                            (?,?)""", Id,Torque)
+                
+                elif Type == 5:
+                    WeightLimit = float(input("WeightLimit: "))
+                    
+                    cursor.execute(f"""INSERT INTO Suspension
+                            (PartID, WeightLimit) VALUES 
+                            (?,?)""", Id,WeightLimit)
+        elif choice == 2:
+            selection = "`Sub-Assembly`"
+            Id = int(input("ID: "))
+            Name = input("Name: ")
+            Version = int(input("Version: "))
+            SAClassification = input("Classification: ")
+            #this will be a list of all robots when we make a gui
+            RobotId = int(input("RobotID: "))
+            
+            cursor.execute(f"""INSERT INTO {selection}
+                           (SATypeID, SAName, `Version`, 
+                           SAClassification, RobotID) VALUES  
+                           (?,?,?,?,?)""",
+                           Id,Name,Version,SAClassification,RobotId)
+            
+        elif choice == 3:
+            selection = 'robot'
+            # this will be a list of all the robots and they select one and they will be able 
+            print(f"""
+                Input the properties of the robot you wish to modify
+                1. ID
+                2. Name
+                3. Both
+                """)
+            property = int(input("properties: "))
+            
+            print(f"""
+                Input the ID of the robot you wish to modify
+                """)
+            
+            Id = int(input("ID: "))
+            
+            if property == 1:
+                newID = int(input("New ID: "))
+                cursor.execute(f"""UPDATE Robot
+                               SET RobotID = ?  
+                            WHERE RobotID = ?""",
+                            newID,Id)
+            elif property == 2:
+                newName = input("New Name: ")
+                cursor.execute(f"""UPDATE Robot
+                               SET RobotName = ?  
+                            WHERE RobotID = ?""",
+                            newName,Id)
+            elif property == 3:
+                newID = int(input("New ID: "))
+                newName = input("New Name: ")
+                cursor.execute(f"""UPDATE Robot
+                            SET RobotName = ? AND RobotID = ? 
+                            WHERE RobotID = ?""",
+                            newID,newName,Id)
             
         # test code to see if it actually added the tuple    
         cursor.execute(f"""SELECT * 
