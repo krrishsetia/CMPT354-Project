@@ -27,6 +27,7 @@ CREATE TABLE Team(
     RobotID INT NOT NULL,
     PRIMARY KEY (RobotID, TeamName),
     FOREIGN KEY (RobotID) REFERENCES Robot(RobotID)
+    ON DELETE CASCADE
 );
 
 CREATE TABLE TeamManagers(
@@ -35,6 +36,7 @@ CREATE TABLE TeamManagers(
     RobotID INT NOT NULL,
     PRIMARY KEY (RobotID, TeamName, ManagerName),
     FOREIGN KEY (RobotID, TeamName) REFERENCES Team(RobotID,TeamName)
+    ON DELETE CASCADE
 );
 
 CREATE TABLE TeamMember(
@@ -78,6 +80,7 @@ CREATE TABLE Structural(
     Material VARCHAR(100),
     `Type` VARCHAR(50),
     FOREIGN KEY (PartID) REFERENCES Part(PartID)
+    ON DELETE CASCADE
 );
 
 CREATE TABLE Electronic(
@@ -85,17 +88,20 @@ CREATE TABLE Electronic(
     MaxCurrentA FLOAT,
     MaxVoltageV FLOAT,
     FOREIGN KEY (PartID) REFERENCES Part(PartID)
+    ON DELETE CASCADE
 );
 
 CREATE TABLE Battery(
     PartID INT PRIMARY KEY,
     CapacitymAh FLOAT,
     FOREIGN KEY (PartID) REFERENCES Electronic(PartID)
+    ON DELETE CASCADE
 );
 
 CREATE TABLE Mechanical(
     PartID INT PRIMARY KEY,
     FOREIGN KEY (PartID) REFERENCES Part(PartID)
+    ON DELETE CASCADE
 );
 
 CREATE TABLE Wheel(
@@ -103,18 +109,21 @@ CREATE TABLE Wheel(
     Radius FLOAT,
     `Type` VARCHAR(50),
     FOREIGN KEY (PartID) REFERENCES Mechanical(PartID)
+    ON DELETE CASCADE
 );
 
 CREATE TABLE Motor(
     PartID INT PRIMARY KEY,
     Torque FLOAT,
     FOREIGN KEY (PartID) REFERENCES Mechanical(PartID)
+    ON DELETE CASCADE
 );
 
 CREATE TABLE Suspension(
     PartID INT PRIMARY KEY,
     WeightLimit FLOAT,
     FOREIGN KEY (PartID) REFERENCES Mechanical(PartID)
+    ON DELETE CASCADE
 );
 
 CREATE TABLE `Sub-Assembly-Parts`(
@@ -123,6 +132,7 @@ CREATE TABLE `Sub-Assembly-Parts`(
     PRIMARY KEY (SATypeID, PartID),
     FOREIGN KEY (SATypeID) REFERENCES `Sub-Assembly`(SATypeID),
     FOREIGN KEY (PartID) REFERENCES Part(PartID)
+    ON DELETE CASCADE
 );
 
 CREATE TABLE `Sub-Assembly-Hierarchy`(
@@ -131,6 +141,7 @@ CREATE TABLE `Sub-Assembly-Hierarchy`(
     PRIMARY KEY (ParentSATypeID, ChildPartID),
     FOREIGN KEY (ParentSATypeID) REFERENCES `Sub-Assembly`(SATypeID),
     FOREIGN KEY (ChildPartID) REFERENCES `Sub-Assembly`(SATypeID)
+    ON DELETE CASCADE
 );
 
 INSERT INTO Robot (RobotID, RobotName) VALUES ('0','dog'),('1','car'),('2','arm'),
@@ -169,7 +180,7 @@ INSERT INTO Part (PartID, PartName, `Weight`, Height, `Length`, Width) VALUES (3
 
 INSERT INTO Structural (PartID, Material, `Type`) VALUES (100, 'Carbon Fiber', 'Panel'), (101, 'Aluminum', 'Frame'), (102, 'Steel', 'Joint'), (103, 'Titanium', 'Support'), (104, 'Polycarbonate', 'Shield');
 
-INSERT INTO Electronic (PartID, MaxCurrentA, MaxVoltageV) VALUES (200, 100, 12), (201, 80, 13), (202, 30, 7), (203, 120, 15), (204, 150, 15), (205, 5, 5), (206, 200, 24), (207, 1, 5), (208, 60, 24), (209, 1, 5);
+INSERT INTO Electronic (PartID, MaxCurrentA, MaxVoltageV) VALUES (200, 100, 1batterybatteryelectronicelectronic2), (201, 80, 13), (202, 30, 7), (203, 120, 15), (204, 150, 15), (205, 5, 5), (206, 200, 24), (207, 1, 5), (208, 60, 24), (209, 1, 5);
 
 INSERT INTO Battery (PartID, CapacitymAh) VALUES (200, 5000), (201, 10000), (202, 3000), (203, 1550), (204, 4500);
 
