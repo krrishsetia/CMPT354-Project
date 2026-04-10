@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>CMPT 354 Usability Demo</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+  <header class="hero">
+    <div class="container hero-inner">
+      <div>
+        <p class="eyebrow">CMPT 354 · Usability Features</p>
+        <h1>Responsive Robot Project Dashboard</h1>
+        <p class="lead">This add-on interface demonstrates a responsive front-end and explains the trigger-based database integrity features used in the project.</p>
+        <div class="hero-actions">
+          <a class="button primary" href="#robots">View robots</a>
+          <a class="button" href="#triggers">View trigger use</a>
+        </div>
+      </div>
+      <div class="hero-card">
+        <div class="metric"><span>Total robots</span><strong>{{ robots|length }}</strong></div>
+        <div class="metric"><span>Responsive layout</span><strong>Desktop · Tablet · Mobile</strong></div>
+        <div class="metric"><span>Integrity logic</span><strong>Triggers + constraints</strong></div>
+      </div>
+    </div>
+  </header>
+
+  <main class="container page-stack">
+    <section class="section" id="overview">
+      <div class="section-head">
+        <div>
+          <p class="eyebrow">Why this helps</p>
+          <h2>Usability features covered</h2>
+        </div>
+      </div>
+      <div class="feature-grid">
+        <article class="feature-card">
+          <h3>Responsive web design</h3>
+          <p>The layout uses flexible grids, readable spacing, large touch targets, and a single-column mobile stack so the interface remains clear on smaller screens.</p>
+        </article>
+        <article class="feature-card">
+          <h3>Trigger-based integrity</h3>
+          <p>The SQL add-on file includes triggers that protect update dates, version history, robot identity consistency, and delete auditing for cascade demonstrations.</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="section" id="robots">
+      <div class="section-head">
+        <div>
+          <p class="eyebrow">Project entities</p>
+          <h2>Robot overview</h2>
+        </div>
+      </div>
+      <div class="robot-grid">
+        {% for robot in robots %}
+        <article class="robot-card">
+          <div class="robot-top">
+            <div>
+              <p class="robot-id">ID #{{ robot.id }} · {{ robot.team }}</p>
+              <h3>{{ robot.name }} robot</h3>
+            </div>
+            <span class="status {{ robot.status|lower }}">{{ robot.status }}</span>
+          </div>
+          <p class="robot-summary">{{ robot.summary }}</p>
+          <dl class="meta-grid">
+            <div><dt>Manager</dt><dd>{{ robot.manager }}</dd></div>
+            <div><dt>Updates</dt><dd>{{ robot.updates }}</dd></div>
+          </dl>
+          <div class="card-actions">
+            <a class="button primary" href="{{ url_for('robot_detail', robot_id=robot.id) }}">Open details</a>
+            <a class="button" href="#{{ robot.trigger_id }}">View trigger use</a>
+          </div>
+        </article>
+        {% endfor %}
+      </div>
+    </section>
+
+    <section class="section" id="triggers">
+      <div class="section-head">
+        <div>
+          <p class="eyebrow">Database integrity</p>
+          <h2>Trigger use in the project</h2>
+        </div>
+      </div>
+      <div class="trigger-list">
+        {% for trigger_id, trigger in triggers.items() %}
+        <article class="trigger-card" id="{{ trigger_id }}">
+          <h3>{{ trigger.title }}</h3>
+          <p><strong>Purpose:</strong> {{ trigger.purpose }}</p>
+          <p><strong>Demo idea:</strong> {{ trigger.demo }}</p>
+        </article>
+        {% endfor %}
+      </div>
+    </section>
+  </main>
+</body>
+</html>
