@@ -58,9 +58,3 @@ def f5_add_or_remove_subassemblyHeirarchy(cursor):
             stop = int(input("choice"))
             if stop == 2:
                 break
-    # test code to see if it actually added the tuple    
-    cursor.execute(f"""SELECT * 
-                        From {selection} """)
-    rows = cursor.fetchall()
-    for row in rows:
-        print(row)

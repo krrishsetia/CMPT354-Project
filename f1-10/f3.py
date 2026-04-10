@@ -25,9 +25,4 @@ def f3_delete_part_subAssembly_robot(cursor):
                         WHERE ID = ?)""",
                         Id)
     
-    # test code to see if it actually added the tuple    
-    cursor.execute(f"""SELECT * 
-                        From {selection} """)
-    rows = cursor.fetchall()
-    for row in rows:
-        print(row)
+    
