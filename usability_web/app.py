@@ -265,7 +265,7 @@ def robot_detail(robot_id: int):
     trigger = TRIGGERS[robot["trigger_id"]]
     return render_template("robot_detail.html", robot=robot, trigger=trigger)
 
-@app.route("/api/entities/<entity_type>")
+@app.route("/entities/<entity_type>")
 def api_get_entities(entity_type):
     from flask import jsonify
     conn = get_db()
@@ -289,7 +289,7 @@ def api_get_entities(entity_type):
         conn.close()
 
 
-@app.route("/api/entity/<entity_type>/<int:entity_id>")
+@app.route("/entity/<entity_type>/<int:entity_id>")
 def api_get_entity_detail(entity_type, entity_id):
     from flask import jsonify
     conn = get_db()
@@ -580,6 +580,45 @@ def functionality_2():
 
     return render_template(
         "functionality_2.html",
+        item=item,
+        functionalities=FUNCTIONALITIES,
+    )
+    
+
+@app.route("/functionalities/delete-records", methods=["GET", "POST"])
+def functionality_3():
+    item = FUNCTIONALITY_MAP.get("delete-records")
+    if not item:
+        abort(404)
+
+    if request.method == "POST":
+        conn = get_db()
+        if not conn:
+            return "Database Connection Error", 500
+
+        cursor = conn.cursor()
+        entity_type = request.form.get("entity_type")
+        entity_id   = int(request.form.get("entity_id"))
+
+        try:
+            if entity_type == "robot":
+                cursor.execute("DELETE FROM Robot WHERE RobotID = ?", (entity_id,))
+            elif entity_type == "sub-assembly":
+                cursor.execute("DELETE FROM `Sub-Assembly` WHERE SATypeID = ?", (entity_id,))
+            elif entity_type == "part":
+                cursor.execute("DELETE FROM Part WHERE PartID = ?", (entity_id,))
+
+            conn.commit()
+        except Exception as e:
+            conn.rollback()
+            return f"Delete failed: {e}", 500
+        finally:
+            conn.close()
+
+        return redirect("/functionalities/delete-records")
+
+    return render_template(
+        "functionality_3.html",
         item=item,
         functionalities=FUNCTIONALITIES,
     )

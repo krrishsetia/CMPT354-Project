@@ -200,7 +200,7 @@
 
     if (!type) return;
 
-    const res  = await fetch(`/api/entities/${type}`);
+    const res  = await fetch(`/entities/${type}`);
     const data = await res.json();
 
     const sel = document.getElementById('record-selector');
@@ -226,7 +226,7 @@
 
     if (!id) return;
 
-    const res = await fetch(`/api/entity/${type}/${id}`);
+    const res = await fetch(`/entity/${type}/${id}`);
     const d   = await res.json();
 
     if (type === 'robot') {
