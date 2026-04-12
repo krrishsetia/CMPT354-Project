@@ -49,7 +49,6 @@ def index():
             r.RobotName as name, 
             t.TeamName as team, 
             tm.ManagerName as manager,
-            'Active' as status, -- You can add a status column to your SQL later
             (SELECT COUNT(*) FROM ProgressUpdates pu WHERE pu.ID IN 
                 (SELECT ID FROM TeamMember WHERE RobotID = r.RobotID)) as updates,
             'Robot project managed by ' + tm.ManagerName as summary
@@ -76,7 +75,16 @@ def robot_detail(robot_id: int):
     conn = get_db()
     cursor = conn.cursor()
     
-    cursor.execute("SELECT RobotID as id, RobotName as name FROM Robot WHERE RobotID = ?", (robot_id,))
+    cursor.execute("""
+                    SELECT r.RobotID as id, 
+                    r.RobotName as name,
+                    t.TeamName as team, 
+                    tm.ManagerName as manager
+                    FROM Robot r
+                    LEFT JOIN Team t ON r.RobotID = t.RobotID
+                    LEFT JOIN TeamManagers tm ON t.RobotID = tm.RobotID AND t.TeamName = tm.TeamName
+                    WHERE r.RobotID = ?
+                    """, robot_id)
     row = cursor.fetchone()
     
     if not row:
@@ -86,13 +94,10 @@ def robot_detail(robot_id: int):
     columns = [column[0] for column in cursor.description]
     robot = dict(zip(columns, row))
     
-    # Add dummy data to match detail page requirements
     robot.update({
-        "team": "Assigned Team",
-        "manager": "Team Lead",
         "status": "In Progress",
         "summary": "Full system integrity check required.",
-        "trigger_id": "future-update" # In a real app, store this in the DB
+        "trigger_id": "future-update" 
     })
     
     trigger = TRIGGERS[robot['trigger_id']]
