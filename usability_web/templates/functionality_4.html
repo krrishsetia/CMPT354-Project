@@ -1,0 +1,191 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{ item.number }} · {{ item.title }}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+  <style>
+    .queue-table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
+    .queue-table th, .queue-table td { padding: .5rem .75rem; text-align: left; border-bottom: 1px solid var(--border, #ddd); }
+    .badge { display: inline-block; padding: .15rem .5rem; border-radius: 999px; font-size: .8em; font-weight: 600; }
+    .badge-add    { background: #d4edda; color: #155724; }
+    .badge-remove { background: #f8d7da; color: #721c24; }
+    .remove-row-btn { background: none; border: none; color: #c00; cursor: pointer; font-size: 1rem; }
+  </style>
+</head>
+<body>
+<main class="container detail-page">
+  <a class="back-link" href="{{ url_for('functionality_index') }}">← Back to all functionality pages</a>
+
+  <section class="card">
+    <p class="eyebrow">{{ item.number }} · {{ item.category }}</p>
+    <h1>{{ item.title }}</h1>
+    <p class="lead">{{ item.description }}</p>
+    <div class="detail-grid detail-grid-three">
+      <div class="info-card"><span>Status</span><strong>Live</strong></div>
+      <div class="info-card"><span>Backend</span><strong>Connected</strong></div>
+      <div class="info-card"><span>Demo use</span><strong>{{ item.demo_note }}</strong></div>
+    </div>
+  </section>
+
+  <!-- ── Row builder ─────────────────────────────────────────────── -->
+  <section class="card">
+    <p class="eyebrow">Build your operation</p>
+
+    <div class="form-grid">
+
+      <label class="field-card">
+        <span>Mode</span>
+        <select id="mode-selector" class="button" style="width:100%; text-align:left;">
+          <option value="add">Add part to sub-assembly</option>
+          <option value="remove">Remove part from sub-assembly</option>
+        </select>
+      </label>
+
+      <label class="field-card">
+        <span>Sub-Assembly</span>
+        <select id="sa-selector" class="button" style="width:100%; text-align:left;">
+          <option value="">-- Loading... --</option>
+        </select>
+      </label>
+
+      <label class="field-card">
+        <span>Part</span>
+        <select id="part-selector" class="button" style="width:100%; text-align:left;">
+          <option value="">-- Loading... --</option>
+        </select>
+      </label>
+
+    </div>
+
+    <div class="hero-actions top-gap">
+      <button type="button" class="button" id="add-to-queue-btn">+ Add to queue</button>
+    </div>
+
+    <p id="builder-error" style="color:#c00; display:none; margin-top:.5rem;">
+      Please select both a sub-assembly and a part.
+    </p>
+  </section>
+
+  <!-- ── Pending queue ───────────────────────────────────────────── -->
+  <section class="card" id="queue-section" style="display:none;">
+    <p class="eyebrow">Pending operations</p>
+    <h2>Review before submitting</h2>
+
+    <form method="POST" action="{{ url_for('functionality_4') }}" id="queue-form">
+      <div class="table-wrap">
+        <table class="queue-table">
+          <thead>
+            <tr>
+              <th>Mode</th>
+              <th>Sub-Assembly</th>
+              <th>Part</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="queue-body">
+            <!-- rows injected by JS -->
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Hidden inputs submitted with the form — one set per queued row -->
+      <div id="hidden-inputs"></div>
+
+      <div class="hero-actions top-gap">
+        <button type="submit" class="button primary" id="submit-btn">
+          Submit all operations
+        </button>
+      </div>
+    </form>
+  </section>
+
+  <!-- ── Dummy dataset ───────────────────────────────────────────── -->
+  <section class="card" id="dataset">
+    <p class="eyebrow">Dummy dataset</p>
+    <h2>Preview table</h2>
+    <div class="table-wrap">
+      <table class="data-table">
+        <tbody>
+          {% for row in item.dummy_rows %}
+          <tr>{% for value in row %}<td>{{ value }}</td>{% endfor %}</tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+</main>
+
+<script>
+  // ── Populate dropdowns on load ───────────────────────────────────
+  async function loadDropdown(url, selectId) {
+    const res  = await fetch(url);
+    const data = await res.json();
+    const sel  = document.getElementById(selectId);
+    sel.innerHTML = '<option value="">-- Select --</option>' +
+      data.map(r => `<option value="${r.id}" data-name="${r.name}">${r.id} — ${r.name}</option>`).join('');
+  }
+
+  loadDropdown('/entities/sub-assembly', 'sa-selector');
+  loadDropdown('/entities/part',         'part-selector');
+
+  // ── Queue state ──────────────────────────────────────────────────
+  // Each entry: { mode, saId, saName, partId, partName }
+  const queue = [];
+
+  document.getElementById('add-to-queue-btn').addEventListener('click', () => {
+    const modeEl = document.getElementById('mode-selector');
+    const saEl   = document.getElementById('sa-selector');
+    const partEl = document.getElementById('part-selector');
+    const errEl  = document.getElementById('builder-error');
+
+    if (!saEl.value || !partEl.value) {
+      errEl.style.display = 'block';
+      return;
+    }
+    errEl.style.display = 'none';
+
+    queue.push({
+      mode:     modeEl.value,
+      saId:     saEl.value,
+      saName:   saEl.options[saEl.selectedIndex].dataset.name,
+      partId:   partEl.value,
+      partName: partEl.options[partEl.selectedIndex].dataset.name,
+    });
+
+    renderQueue();
+  });
+
+  function renderQueue() {
+    const tbody  = document.getElementById('queue-body');
+    const hidden = document.getElementById('hidden-inputs');
+    const section = document.getElementById('queue-section');
+
+    section.style.display = queue.length ? 'block' : 'none';
+
+    tbody.innerHTML = queue.map((row, i) => `
+      <tr id="queue-row-${i}">
+        <td><span class="badge badge-${row.mode}">${row.mode}</span></td>
+        <td>${row.saId} — ${row.saName}</td>
+        <td>${row.partId} — ${row.partName}</td>
+        <td><button type="button" class="remove-row-btn" onclick="removeRow(${i})">✕</button></td>
+      </tr>
+    `).join('');
+
+    // Rebuild hidden inputs so the form always matches the queue array
+    hidden.innerHTML = queue.map(row => `
+      <input type="hidden" name="mode[]"    value="${row.mode}">
+      <input type="hidden" name="sa_id[]"   value="${row.saId}">
+      <input type="hidden" name="part_id[]" value="${row.partId}">
+    `).join('');
+  }
+
+  function removeRow(index) {
+    queue.splice(index, 1);
+    renderQueue();
+  }
+</script>
+</body>
+</html>

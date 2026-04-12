@@ -622,6 +622,93 @@ def functionality_3():
         item=item,
         functionalities=FUNCTIONALITIES,
     )
+    
+@app.route("/functionalities/subassembly-parts", methods=["GET", "POST"])
+def functionality_4():
+    item = FUNCTIONALITY_MAP.get("subassembly-parts")
+    if not item:
+        abort(404)
+
+    if request.method == "POST":
+        conn = get_db()
+        if not conn:
+            return "Database Connection Error", 500
+
+        cursor = conn.cursor()
+        # The form sends parallel lists: modes[], sa_ids[], part_ids[]
+        modes    = request.form.getlist("mode[]")
+        sa_ids   = request.form.getlist("sa_id[]")
+        part_ids = request.form.getlist("part_id[]")
+
+        try:
+            for mode, sa_id, part_id in zip(modes, sa_ids, part_ids):
+                if mode == "add":
+                    cursor.execute(
+                        "INSERT INTO `Sub-Assembly-Parts` (SATypeID, PartID) VALUES (?, ?)",
+                        (int(sa_id), int(part_id))
+                    )
+                elif mode == "remove":
+                    cursor.execute(
+                        "DELETE FROM `Sub-Assembly-Parts` WHERE SATypeID = ? AND PartID = ?",
+                        (int(sa_id), int(part_id))
+                    )
+            conn.commit()
+        except Exception as e:
+            conn.rollback()
+            return f"Operation failed: {e}", 500
+        finally:
+            conn.close()
+
+        return redirect("/functionalities/subassembly-parts")
+
+    return render_template(
+        "functionality_4.html",
+        item=item,
+        functionalities=FUNCTIONALITIES,
+    )
+
+@app.route("/functionalities/subassembly-hierarchy", methods=["GET", "POST"])
+def functionality_5():
+    item = FUNCTIONALITY_MAP.get("subassembly-hierarchy")
+    if not item:
+        abort(404)
+
+    if request.method == "POST":
+        conn = get_db()
+        if not conn:
+            return "Database Connection Error", 500
+
+        cursor = conn.cursor()
+        modes      = request.form.getlist("mode[]")
+        parent_ids = request.form.getlist("parent_id[]")
+        child_ids  = request.form.getlist("child_id[]")
+
+        try:
+            for mode, parent_id, child_id in zip(modes, parent_ids, child_ids):
+                if mode == "add":
+                    cursor.execute(
+                        "INSERT INTO `Sub-Assembly-Hierarchy` (ParentSATypeID, ChildPartID) VALUES (?, ?)",
+                        (int(parent_id), int(child_id))
+                    )
+                elif mode == "remove":
+                    cursor.execute(
+                        "DELETE FROM `Sub-Assembly-Hierarchy` WHERE ParentSATypeID = ? AND ChildPartID = ?",
+                        (int(parent_id), int(child_id))
+                    )
+            conn.commit()
+        except Exception as e:
+            conn.rollback()
+            return f"Operation failed: {e}", 500
+        finally:
+            conn.close()
+
+        return redirect("/functionalities/subassembly-hierarchy")
+
+    return render_template(
+        "functionality_5.html",
+        item=item,
+        functionalities=FUNCTIONALITIES,
+    )
 
 @app.route("/functionalities/<slug>")
 def functionality_detail(slug: str):
