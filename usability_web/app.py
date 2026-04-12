@@ -265,6 +265,118 @@ def robot_detail(robot_id: int):
     trigger = TRIGGERS[robot["trigger_id"]]
     return render_template("robot_detail.html", robot=robot, trigger=trigger)
 
+@app.route("/api/entities/<entity_type>")
+def api_get_entities(entity_type):
+    from flask import jsonify
+    conn = get_db()
+    if not conn:
+        return jsonify([]), 500
+    try:
+        cursor = conn.cursor()
+        if entity_type == "robot":
+            cursor.execute("SELECT RobotID, RobotName FROM Robot ORDER BY RobotID")
+        elif entity_type == "sub-assembly":
+            cursor.execute("SELECT SATypeID, SAName FROM `Sub-Assembly` ORDER BY SATypeID")
+        elif entity_type == "part":
+            cursor.execute("SELECT PartID, PartName FROM Part ORDER BY PartID")
+        else:
+            return jsonify([])
+        rows = cursor.fetchall()
+        return jsonify([{"id": r[0], "name": r[1]} for r in rows])
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+    finally:
+        conn.close()
+
+
+@app.route("/api/entity/<entity_type>/<int:entity_id>")
+def api_get_entity_detail(entity_type, entity_id):
+    from flask import jsonify
+    conn = get_db()
+    if not conn:
+        return jsonify({}), 500
+    try:
+        cursor = conn.cursor()
+        if entity_type == "robot":
+            cursor.execute("SELECT RobotID, RobotName FROM Robot WHERE RobotID = ?", (entity_id,))
+            r = cursor.fetchone()
+            if not r:
+                return jsonify({}), 404
+            return jsonify({"id": r[0], "name": r[1]})
+
+        elif entity_type == "sub-assembly":
+            cursor.execute(
+                "SELECT SATypeID, SAName, Version, SAClassification, RobotID FROM `Sub-Assembly` WHERE SATypeID = ?",
+                (entity_id,)
+            )
+            r = cursor.fetchone()
+            if not r:
+                return jsonify({}), 404
+            return jsonify({"id": r[0], "name": r[1], "version": r[2],
+                            "classification": r[3], "robot_id": r[4]})
+
+        elif entity_type == "part":
+            cursor.execute(
+                "SELECT PartID, PartName, Weight, Height, Length, Width FROM Part WHERE PartID = ?",
+                (entity_id,)
+            )
+            r = cursor.fetchone()
+            if not r:
+                return jsonify({}), 404
+            base = {"id": r[0], "name": r[1], "weight": r[2],
+                    "height": r[3], "length": r[4], "width": r[5]}
+
+            # Detect which subtype table this part belongs to
+            cursor.execute("""
+                SELECT 'battery'    FROM DUAL WHERE EXISTS (SELECT 1 FROM Battery    WHERE PartID = ?)
+                UNION ALL
+                SELECT 'electronic' FROM DUAL WHERE EXISTS (SELECT 1 FROM Electronic WHERE PartID = ?)
+                UNION ALL
+                SELECT 'structural' FROM DUAL WHERE EXISTS (SELECT 1 FROM Structural WHERE PartID = ?)
+                UNION ALL
+                SELECT 'wheel'      FROM DUAL WHERE EXISTS (SELECT 1 FROM Wheel      WHERE PartID = ?)
+                UNION ALL
+                SELECT 'motor'      FROM DUAL WHERE EXISTS (SELECT 1 FROM Motor      WHERE PartID = ?)
+                UNION ALL
+                SELECT 'suspension' FROM DUAL WHERE EXISTS (SELECT 1 FROM Suspension WHERE PartID = ?)
+            """, (entity_id,) * 6)
+            subtype_row = cursor.fetchone()
+            subtype = subtype_row[0] if subtype_row else None
+            base["subtype"] = subtype
+
+            if subtype == "battery":
+                cursor.execute("SELECT MaxCurrentA, MaxVoltageV, CapacitymAh FROM Battery WHERE PartID = ?", (entity_id,))
+                s = cursor.fetchone()
+                base.update({"max_current": s[0], "max_voltage": s[1], "capacity": s[2]})
+            elif subtype == "electronic":
+                cursor.execute("SELECT MaxCurrentA, MaxVoltageV FROM Electronic WHERE PartID = ?", (entity_id,))
+                s = cursor.fetchone()
+                base.update({"max_current": s[0], "max_voltage": s[1]})
+            elif subtype == "structural":
+                cursor.execute("SELECT Material, `Type` FROM Structural WHERE PartID = ?", (entity_id,))
+                s = cursor.fetchone()
+                base.update({"material": s[0], "type": s[1]})
+            elif subtype == "wheel":
+                cursor.execute("SELECT Radius, `Type` FROM Wheel WHERE PartID = ?", (entity_id,))
+                s = cursor.fetchone()
+                base.update({"radius": s[0], "wheel_type": s[1]})
+            elif subtype == "motor":
+                cursor.execute("SELECT Torque FROM Motor WHERE PartID = ?", (entity_id,))
+                s = cursor.fetchone()
+                base.update({"torque": s[0]})
+            elif subtype == "suspension":
+                cursor.execute("SELECT WeightLimit FROM Suspension WHERE PartID = ?", (entity_id,))
+                s = cursor.fetchone()
+                base.update({"weight_limit": s[0]})
+
+            return jsonify(base)
+
+        return jsonify({}), 400
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+    finally:
+        conn.close()
+
 
 @app.route("/functionalities")
 def functionality_index():
@@ -385,245 +497,87 @@ def functionality_1():
 @app.route("/functionalities/modify-records", methods=["GET", "POST"])
 def functionality_2():
     item = FUNCTIONALITY_MAP.get("modify-records")
-    conn = get_db()
-    if item is None or conn is None:
+    if not item:
         abort(404)
+
     if request.method == "POST":
+        conn = get_db()
+        if not conn:
+            return "Database Connection Error", 500
+
         cursor = conn.cursor()
         entity_type = request.form.get("entity_type")
-        
-        
-        if "part" in entity_type.lower():
-            property = int(input("properties: "))
-        
-            print(f"""
-                Input the ID of the Sub-Assembly you wish to modify
-                """)
-            
-            Id = int(input("ID: "))
-            
-            if property == 1:
-                newName = input("New Name: ")
-                cursor.execute(f"""UPDATE part
-                            SET PartName = ?  
-                            WHERE PartID = ?""",
-                            newName,Id)
-            elif property == 2:
-                newWeight = int(input("New Weight: "))
-                cursor.execute(f"""UPDATE part
-                            SET `Weight` = ?
-                            WHERE PartID = ?""",
-                            newWeight,Id)
-            elif property == 3:
-                newHeight = input("New Height: ")
-                cursor.execute(f"""UPDATE part
-                            SET Height = ?  
-                            WHERE PartID = ?""",
-                            newHeight,Id)
-            elif property == 4:
-                newLength = int(input("New Length: "))
-                cursor.execute(f"""UPDATE part
-                            SET `Length` = ?
-                            WHERE PartID = ?""",
-                            newRobotId,Id)
-            elif property == 5:
-                newWidth = input("New Width: ")
-                cursor.execute(f"""UPDATE part
-                            SET Width = ?  
-                            WHERE PartID = ?""",
-                            newWidth,Id)
-            elif property == 6:
-            
-                # inputs id 7 times instead of doing id,id ..., id
-                parmaInput = (Id,) * 7
-                
-                #select 'some string' will return said string if the where statment is true
-                #dual means if you find the id, print 'x' once, it for things like this
-                
-                cursor.execute(f""" SELECT 'Battery' FROM DUAL WHERE EXISTS (SELECT 1 FROM Battery WHERE PartID = ?)
-                                    UNION ALL
-                                    SELECT 'Electronic' FROM DUAL WHERE EXISTS (SELECT 1 FROM Electronic WHERE PartID = ?)
-                                    UNION ALL
-                                    SELECT 'Mechanical' FROM DUAL WHERE EXISTS (SELECT 1 FROM Mechanical WHERE PartID = ?)
-                                    UNION ALL
-                                    SELECT 'Structural' FROM DUAL WHERE EXISTS (SELECT 1 FROM Structural WHERE PartID = ?)
-                                    UNION ALL
-                                    SELECT 'Wheel' FROM DUAL WHERE EXISTS (SELECT 1 FROM Wheel WHERE PartID = ?)
-                                    UNION ALL
-                                    SELECT 'Motor' FROM DUAL WHERE EXISTS (SELECT 1 FROM Motor WHERE PartID = ?)
-                                    UNION ALL
-                                    SELECT 'Suspension' FROM DUAL WHERE EXISTS (SELECT 1 FROM Suspension WHERE PartID = ?);
-                            """,parmaInput) 
-                
-                rows = cursor.fetchall()
-            
-            if ('Battery',) in rows:
-                print(f"""
-                Input the property of the Battery you wish to modify
-                1. Max Current
-                2. Max Voltage
-                3. Capacity
-                """)
-                
-                subProperty = int(input("properties: "))
-                
-                if subProperty == 1:
-                    newCurrent = int(input("New Max Current: "))
-                    cursor.execute(f"""UPDATE Electronic
-                                SET MaxCurrentA = ?
-                                WHERE PartID = ?""",
-                                newCurrent,Id)
-                elif subProperty == 2:
-                    newVoltage = input("New Max Voltage: ")
-                    cursor.execute(f"""UPDATE Electronic
-                                SET MaxVoltageV = ?  
-                                WHERE PartID = ?""",
-                                newVoltage,Id)
-                elif subProperty == 3:
-                    newCapacity = int(input("New CapacitymAh: "))
-                    cursor.execute(f"""UPDATE Battery
-                                SET CapacitymAh = ?
-                                WHERE PartID = ?""",
-                                newCapacity,Id)
-            
-            elif ('Electronic',) in rows:
-                print(f"""
-                Input the property of the Electronic you wish to modify
-                1. Max Current
-                2. Max Voltage
-                """)
-                
-                subProperty = int(input("properties: "))
-                
-                if subProperty == 1:
-                    newCurrent = int(input("New Max Current: "))
-                    cursor.execute(f"""UPDATE Electronic
-                                SET MaxCurrentA = ?
-                                WHERE PartID = ?""",
-                                newCurrent,Id)
-                elif subProperty == 2:
-                    newVoltage = input("New Max Voltage: ")
-                    cursor.execute(f"""UPDATE Electronic
-                                SET MaxVoltageV = ?  
-                                WHERE PartID = ?""",
-                                newVoltage,Id)
-                
-            elif ('Structural',) in rows:
-                print(f"""
-                Input the property of the Structural part you wish to modify
-                1. Material
-                2. Type
-                """)
-                
-                subProperty = int(input("properties: "))
-                
-                if subProperty == 1:
-                    newMaterial = int(input("New Material: "))
-                    cursor.execute(f"""UPDATE Structural
-                                SET Material = ?
-                                WHERE PartID = ?""",
-                                newMaterial,Id)
-                elif subProperty == 2:
-                    newType = input("New Type: ")
-                    cursor.execute(f"""UPDATE Structural
-                                SET `Type` = ?  
-                                WHERE PartID = ?""",
-                                newType,Id)
-            
-            elif ('Wheel',) in rows:
-                print(f"""
-                Input the property of the Wheel you wish to modify
-                1. Radius
-                2. `Type`
-                """)
-                
-                subProperty = int(input("properties: "))
-                
-                if subProperty == 1:
-                    newRadius = int(input("New Radius: "))
-                    cursor.execute(f"""UPDATE Wheel
-                                SET Radius = ?
-                                WHERE PartID = ?""",
-                                newRadius,Id)
-                elif subProperty == 2:
-                    newType = input("New Type: ")
-                    cursor.execute(f"""UPDATE Wheel
-                                SET `Type` = ?  
-                                WHERE PartID = ?""",
-                                newType,Id)
-            elif ('Motor',) in rows:
-                print(f"""
-                Input the new torque for the motor
-                """)
-            
-                newTorque = input("New Torque: ")
-                cursor.execute(f"""UPDATE Motor
-                            SET Torque = ?  
-                            WHERE PartID = ?""",
-                            newType,Id)
-            elif ('Suspension',) in rows:
-                print(f"""
-                Input the new weight limit for the suspension
-                """)
-            
-                newTorque = input("New Weight Limit: ")
-                cursor.execute(f"""UPDATE Suspension
-                            SET WeightLimit = ?  
-                            WHERE PartID = ?""",
-                            newType,Id)
-            
-        elif "sub-assembly" in entity_type.lower():
-            Id = request.form.get("id")
-            property = int(input("properties: "))
-        
-            print(f"""
-                Input the ID of the Sub-Assembly you wish to modify
-                """)
-            
-            Id = int(input("ID: "))
-            
-            if property == 1:
-                newName = input("New Name: ")
-                cursor.execute(f"""UPDATE `Sub-Assembly`
-                                SET SAName = ?  
-                            WHERE SATypeID = ?""",
-                            newName,Id)
-            elif property == 2:
-                newVersion = int(input("New Version: "))
-                cursor.execute(f"""UPDATE `Sub-Assembly`
-                            SET `Version` = ?
-                            WHERE SATypeID = ?""",
-                            newVersion,Id)
-            elif property == 3:
-                newClassification = input("New SAClassification: ")
-                cursor.execute(f"""UPDATE `Sub-Assembly`
-                            SET SAClassification = ?
-                            WHERE SATypeID = ?""",
-                            newClassification,Id)
-            elif property == 4:
-                newRobotId = int(input("New RobotId: "))
-                cursor.execute(f"""UPDATE `Sub-Assembly`
-                            SET RobotID = ?
-                            WHERE SATypeID = ?""",
-                            newRobotId,Id)
-            
-        elif "robot" in entity_type.lower():
-            
-            Id = request.form.get("id")
-            Id = int(input("ID: "))
+        entity_id   = int(request.form.get("entity_id"))
 
-            newName = input("New Name: ")
-            cursor.execute(f"""UPDATE Robot
-                            SET RobotName = ?  
-                        WHERE RobotID = ?""",
-                        newName,Id)
-        
-        conn.commit()
-        
-        conn.close()
-        
-        return redirect("")
-    
+        try:
+            if entity_type == "robot":
+                cursor.execute(
+                    "UPDATE Robot SET RobotName = ? WHERE RobotID = ?",
+                    (request.form["name"], entity_id)
+                )
+
+            elif entity_type == "sub-assembly":
+                cursor.execute(
+                    """UPDATE `Sub-Assembly`
+                       SET SAName = ?, `Version` = ?, SAClassification = ?, RobotID = ?
+                       WHERE SATypeID = ?""",
+                    (request.form["name"], request.form["version"],
+                     request.form["classification"], request.form["robot_id"], entity_id)
+                )
+
+            elif entity_type == "part":
+                cursor.execute(
+                    """UPDATE Part
+                       SET PartName = ?, `Weight` = ?, Height = ?, `Length` = ?, Width = ?
+                       WHERE PartID = ?""",
+                    (request.form["name"], request.form["weight"], request.form["height"],
+                     request.form["length"], request.form["width"], entity_id)
+                )
+                subtype = request.form.get("subtype", "")
+                if subtype == "battery":
+                    cursor.execute(
+                        "UPDATE Electronic SET MaxCurrentA = ?, MaxVoltageV = ? WHERE PartID = ?",
+                        (request.form["max_current"], request.form["max_voltage"], entity_id)
+                    )
+                    cursor.execute(
+                        "UPDATE Battery SET CapacitymAh = ? WHERE PartID = ?",
+                        (request.form["capacity"], entity_id)
+                    )
+                elif subtype == "electronic":
+                    cursor.execute(
+                        "UPDATE Electronic SET MaxCurrentA = ?, MaxVoltageV = ? WHERE PartID = ?",
+                        (request.form["max_current"], request.form["max_voltage"], entity_id)
+                    )
+                elif subtype == "structural":
+                    cursor.execute(
+                        "UPDATE Structural SET Material = ?, `Type` = ? WHERE PartID = ?",
+                        (request.form["material"], request.form["type"], entity_id)
+                    )
+                elif subtype == "wheel":
+                    cursor.execute(
+                        "UPDATE Wheel SET Radius = ?, `Type` = ? WHERE PartID = ?",
+                        (request.form["radius"], request.form["wheel_type"], entity_id)
+                    )
+                elif subtype == "motor":
+                    cursor.execute(
+                        "UPDATE Motor SET Torque = ? WHERE PartID = ?",
+                        (request.form["torque"], entity_id)
+                    )
+                elif subtype == "suspension":
+                    cursor.execute(
+                        "UPDATE Suspension SET WeightLimit = ? WHERE PartID = ?",
+                        (request.form["weight_limit"], entity_id)
+                    )
+
+            conn.commit()
+        except Exception as e:
+            conn.rollback()
+            return f"Update failed: {e}", 500
+        finally:
+            conn.close()
+
+        return redirect("/functionalities/modify-records")
+
     return render_template(
         "functionality_2.html",
         item=item,
@@ -643,7 +597,7 @@ def functionality_detail(slug: str):
     elif slug in {"modify-records"}:
         related_trigger = TRIGGERS["future-update"]
     return render_template(
-        "functionality_1.html",
+        "functionality_detail.html",
         item=item,
         related_trigger=related_trigger,
         functionalities=FUNCTIONALITIES,
