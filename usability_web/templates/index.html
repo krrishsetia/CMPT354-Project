@@ -12,15 +12,15 @@
       <div>
         <p class="eyebrow">CMPT 354 · Usability Features</p>
         <h1>Responsive Robot Project Dashboard</h1>
-        <p class="lead">This add-on interface demonstrates a responsive front-end and explains the trigger-based database integrity features used in the project.</p>
+        <p class="lead">This add-on interface demonstrates a responsive front-end, placeholder pages for unfinished project functions, and trigger-based database integrity features for the final demo.</p>
         <div class="hero-actions">
           <a class="button primary" href="#robots">View robots</a>
-          <a class="button" href="#triggers">View trigger use</a>
+          <a class="button" href="{{ url_for('functionality_index') }}">Open all functionality pages</a>
         </div>
       </div>
       <div class="hero-card">
         <div class="metric"><span>Total robots</span><strong>{{ robots|length }}</strong></div>
-        <div class="metric"><span>Responsive layout</span><strong>Desktop · Tablet · Mobile</strong></div>
+        <div class="metric"><span>Function pages</span><strong>{{ functionalities|length }} linked placeholders</strong></div>
         <div class="metric"><span>Integrity logic</span><strong>Triggers + constraints</strong></div>
       </div>
     </div>
@@ -46,6 +46,25 @@
       </div>
     </section>
 
+    <section class="section" id="functions-preview">
+      <div class="section-head">
+        <div>
+          <p class="eyebrow">Application structure</p>
+          <h2>Linked functionality pages</h2>
+        </div>
+        <a class="button" href="{{ url_for('functionality_index') }}">See all pages</a>
+      </div>
+      <div class="function-grid compact">
+        {% for item in functionalities[:6] %}
+        <a class="function-card" href="{{ url_for('functionality_detail', slug=item.slug) }}">
+          <span class="function-tag">{{ item.number }}</span>
+          <h3>{{ item.title }}</h3>
+          <p>{{ item.category }}</p>
+        </a>
+        {% endfor %}
+      </div>
+    </section>
+
     <section class="section" id="robots">
       <div class="section-head">
         <div>
@@ -59,7 +78,7 @@
           <div class="robot-top">
             <div>
               <p class="robot-id">ID #{{ robot.id }} · {{ robot.team }}</p>
-              <h3>{{ robot.name }} robot</h3>
+              <h3>{{ robot.name|title }} robot</h3>
             </div>
             <span class="status {{ robot.status|lower }}">{{ robot.status }}</span>
           </div>
