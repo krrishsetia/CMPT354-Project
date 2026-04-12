@@ -1,0 +1,24 @@
+<form method="get" action="{{ url_for('functionality_detail', slug='version-history') }}" class="stack">
+  <label class="field-card">
+    <span>Choose type</span>
+    <select name="entity_type">
+      <option value="robot" {% if entity_type == "robot" %}selected{% endif %}>Robot</option>
+      <option value="subassembly" {% if entity_type == "subassembly" %}selected{% endif %}>Sub-assembly</option>
+    </select>
+  </label>
+
+  <label class="field-card">
+    <span>Enter ID or Name</span>
+    <input
+      type="text"
+      name="identifier"
+      value="{{ identifier or '' }}"
+      placeholder="Example: 1 or wheel-pod"
+      required
+    >
+  </label>
+
+  <div class="hero-actions">
+    <button class="button" type="submit">Search</button>
+  </div>
+</form>
