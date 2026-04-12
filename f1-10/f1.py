@@ -15,16 +15,17 @@ def f1_add_part_subAssembly_robot(cursor):
         
         Id = int(input("ID: "))
         Name = input("Name: ")
-        Weight = float(input("Weight: "))
-        Length = float(input("Length: "))
-        Height = float(input("Height: "))
-        Width  = float(input("Width : "))
+        Weight = float(input("Weight  : "))
+        Length = float(input("Length  : "))
+        Height = float(input("Height  : "))
+        Width  = float(input("Width   : "))
+        Quantity = int(input("Quantity:"))
         
         cursor.execute(f"""INSERT INTO {selection}
                         (PartID, PartName, `Weight`, 
-                        Height, `Length`, Width) VALUES  
-                        (?,?,?,?,?,?)""",
-                        Id,Name,Weight,Length,Height,Width)
+                        Height, `Length`, Width, Quantity) VALUES  
+                        (?,?,?,?,?,?,?)""",
+                        Id,Name,Weight,Length,Height,Width,Quantity)
         #this will be a list of all types when we make a gui
         print(f"""
             types:
