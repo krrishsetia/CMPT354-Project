@@ -1,5 +1,5 @@
 import os
-from flask import Flask, render_template, abort
+from flask import Flask, render_template, abort, request, redirect
 try:
     from SQLSetup.database_conection import get_mysql_connection
 except Exception:
@@ -270,6 +270,365 @@ def robot_detail(robot_id: int):
 def functionality_index():
     return render_template("functionality_index.html", functionalities=FUNCTIONALITIES)
 
+@app.route("/functionalities/add-records", methods=["GET", "POST"])
+def functionality_1():
+    item = FUNCTIONALITY_MAP.get("add-records")
+    
+    conn = get_db()
+    if item is None or conn is None:
+        abort(404)
+    
+    if request.method == "POST":
+        cursor = conn.cursor()
+        entity_type = request.form.get("entity_type")
+        
+        
+        if "part" in entity_type.lower():
+            #part is going to need to be overhauled
+            
+            Id = request.form.get("id")
+            Name = request.form.get("name")
+            Weight = request.form.get("Weight")
+            Length = request.form.get("Length")
+            Height = request.form.get("Height")
+            Width  = request.form.get("Width")
+            Quantity = request.form.get("Quantity")
+            
+            cursor.execute(f"""INSERT INTO Part
+                            (PartID, PartName, `Weight`, 
+                            Height, `Length`, Width, Quantity) VALUES  
+                            (?,?,?,?,?,?,?)""",
+                            Id,Name,Weight,Length,Height,Width,Quantity)
+
+            Sub_type = request.form.get("entity_subtype")
+            
+            if "electronic" in Sub_type.lower() and "battery" in Sub_type.lower():
+                MaxVoltageV = request.form.get("MaxCurrentA")
+                MaxCurrentA = request.form.get("MaxVoltageV")
+                
+                cursor.execute(f"""INSERT INTO Electronic
+                        (PartID, MaxCurrentA,MaxVoltageV) VALUES  
+                        (?,?,?)""",
+                        Id,MaxCurrentA,MaxVoltageV)
+                if "battery" in Sub_type.lower():
+                    CapacitymAh = request.form.get("CapacitymAh")
+                    
+                    cursor.execute(f"""INSERT INTO Battery
+                            (PartID, CapacitymAh) VALUES  
+                            (?,?)""",
+                            Id,CapacitymAh)
+            elif "wheel" in Sub_type.lower() and "motor" in Sub_type.lower() and "suspension" in Sub_type.lower():
+                cursor.execute(f"""INSERT INTO Mechanical
+                            (PartID) VALUES  (?)""", Id)
+                
+                if "wheel" in Sub_type.lower():
+                    Radius = request.form.get("radius")
+                    WheelType = request.form.get("wheel-type")
+                    
+                    cursor.execute(f"""INSERT INTO Wheel
+                            (PartID, Radius, `Sub_type`) VALUES 
+                            (?,?,?)""", Id,Radius,WheelType)
+                elif "motor" in Sub_type.lower():
+                    Torque = request.form.get("torque")
+                    
+                    cursor.execute(f"""INSERT INTO Motor
+                            (PartID, Torque) VALUES 
+                            (?,?)""", Id,Torque)
+                
+                elif "suspension" in Sub_type.lower():
+                    WeightLimit = request.form.get("limit")
+                    
+                    cursor.execute(f"""INSERT INTO Suspension
+                            (PartID, WeightLimit) VALUES 
+                            (?,?)""", Id,WeightLimit)
+            elif "structural" in Sub_type.lower():
+                Material = request.form.get("material")
+                Type = request.form.get("type")
+                cursor.execute(f"""INSERT INTO Structural
+                            (PartID, Material, `Type`) VALUES 
+                            (?,?,?)""", Id,Material,Type)
+        elif "sub-assembly" in entity_type.lower():
+            Id = request.form.get("id")
+            Name = request.form.get("name")
+            Version = request.form.get("version")
+            SAClassification = request.form.get("classification")
+            #this will be a list of all robots when we make a gui
+            RobotId = request.form.get("robot_id")
+            
+            cursor.execute(f"""INSERT INTO `Sub-Assembly`
+                            (SATypeID, SAName, `Version`, 
+                            SAClassification, RobotID) VALUES  
+                            (?,?,?,?,?)""",
+                            Id,Name,Version,SAClassification,RobotId)
+            
+        elif "robot" in entity_type.lower():
+            
+            Id = request.form.get("id")
+            Name = request.form.get("name")
+            cursor.execute(f"""INSERT INTO Robot
+                            (RobotID, RobotName) VALUES  
+                            (?,?)""",
+                            Id,Name)
+        
+        conn.commit()
+        
+        conn.close()
+        
+        return redirect("")
+    
+    return render_template(
+        "functionality_1.html",
+        item=item,
+        functionalities=FUNCTIONALITIES,
+    )
+
+@app.route("/functionalities/modify-records", methods=["GET", "POST"])
+def functionality_2():
+    item = FUNCTIONALITY_MAP.get("modify-records")
+    conn = get_db()
+    if item is None or conn is None:
+        abort(404)
+    if request.method == "POST":
+        cursor = conn.cursor()
+        entity_type = request.form.get("entity_type")
+        
+        
+        if "part" in entity_type.lower():
+            property = int(input("properties: "))
+        
+            print(f"""
+                Input the ID of the Sub-Assembly you wish to modify
+                """)
+            
+            Id = int(input("ID: "))
+            
+            if property == 1:
+                newName = input("New Name: ")
+                cursor.execute(f"""UPDATE part
+                            SET PartName = ?  
+                            WHERE PartID = ?""",
+                            newName,Id)
+            elif property == 2:
+                newWeight = int(input("New Weight: "))
+                cursor.execute(f"""UPDATE part
+                            SET `Weight` = ?
+                            WHERE PartID = ?""",
+                            newWeight,Id)
+            elif property == 3:
+                newHeight = input("New Height: ")
+                cursor.execute(f"""UPDATE part
+                            SET Height = ?  
+                            WHERE PartID = ?""",
+                            newHeight,Id)
+            elif property == 4:
+                newLength = int(input("New Length: "))
+                cursor.execute(f"""UPDATE part
+                            SET `Length` = ?
+                            WHERE PartID = ?""",
+                            newRobotId,Id)
+            elif property == 5:
+                newWidth = input("New Width: ")
+                cursor.execute(f"""UPDATE part
+                            SET Width = ?  
+                            WHERE PartID = ?""",
+                            newWidth,Id)
+            elif property == 6:
+            
+                # inputs id 7 times instead of doing id,id ..., id
+                parmaInput = (Id,) * 7
+                
+                #select 'some string' will return said string if the where statment is true
+                #dual means if you find the id, print 'x' once, it for things like this
+                
+                cursor.execute(f""" SELECT 'Battery' FROM DUAL WHERE EXISTS (SELECT 1 FROM Battery WHERE PartID = ?)
+                                    UNION ALL
+                                    SELECT 'Electronic' FROM DUAL WHERE EXISTS (SELECT 1 FROM Electronic WHERE PartID = ?)
+                                    UNION ALL
+                                    SELECT 'Mechanical' FROM DUAL WHERE EXISTS (SELECT 1 FROM Mechanical WHERE PartID = ?)
+                                    UNION ALL
+                                    SELECT 'Structural' FROM DUAL WHERE EXISTS (SELECT 1 FROM Structural WHERE PartID = ?)
+                                    UNION ALL
+                                    SELECT 'Wheel' FROM DUAL WHERE EXISTS (SELECT 1 FROM Wheel WHERE PartID = ?)
+                                    UNION ALL
+                                    SELECT 'Motor' FROM DUAL WHERE EXISTS (SELECT 1 FROM Motor WHERE PartID = ?)
+                                    UNION ALL
+                                    SELECT 'Suspension' FROM DUAL WHERE EXISTS (SELECT 1 FROM Suspension WHERE PartID = ?);
+                            """,parmaInput) 
+                
+                rows = cursor.fetchall()
+            
+            if ('Battery',) in rows:
+                print(f"""
+                Input the property of the Battery you wish to modify
+                1. Max Current
+                2. Max Voltage
+                3. Capacity
+                """)
+                
+                subProperty = int(input("properties: "))
+                
+                if subProperty == 1:
+                    newCurrent = int(input("New Max Current: "))
+                    cursor.execute(f"""UPDATE Electronic
+                                SET MaxCurrentA = ?
+                                WHERE PartID = ?""",
+                                newCurrent,Id)
+                elif subProperty == 2:
+                    newVoltage = input("New Max Voltage: ")
+                    cursor.execute(f"""UPDATE Electronic
+                                SET MaxVoltageV = ?  
+                                WHERE PartID = ?""",
+                                newVoltage,Id)
+                elif subProperty == 3:
+                    newCapacity = int(input("New CapacitymAh: "))
+                    cursor.execute(f"""UPDATE Battery
+                                SET CapacitymAh = ?
+                                WHERE PartID = ?""",
+                                newCapacity,Id)
+            
+            elif ('Electronic',) in rows:
+                print(f"""
+                Input the property of the Electronic you wish to modify
+                1. Max Current
+                2. Max Voltage
+                """)
+                
+                subProperty = int(input("properties: "))
+                
+                if subProperty == 1:
+                    newCurrent = int(input("New Max Current: "))
+                    cursor.execute(f"""UPDATE Electronic
+                                SET MaxCurrentA = ?
+                                WHERE PartID = ?""",
+                                newCurrent,Id)
+                elif subProperty == 2:
+                    newVoltage = input("New Max Voltage: ")
+                    cursor.execute(f"""UPDATE Electronic
+                                SET MaxVoltageV = ?  
+                                WHERE PartID = ?""",
+                                newVoltage,Id)
+                
+            elif ('Structural',) in rows:
+                print(f"""
+                Input the property of the Structural part you wish to modify
+                1. Material
+                2. Type
+                """)
+                
+                subProperty = int(input("properties: "))
+                
+                if subProperty == 1:
+                    newMaterial = int(input("New Material: "))
+                    cursor.execute(f"""UPDATE Structural
+                                SET Material = ?
+                                WHERE PartID = ?""",
+                                newMaterial,Id)
+                elif subProperty == 2:
+                    newType = input("New Type: ")
+                    cursor.execute(f"""UPDATE Structural
+                                SET `Type` = ?  
+                                WHERE PartID = ?""",
+                                newType,Id)
+            
+            elif ('Wheel',) in rows:
+                print(f"""
+                Input the property of the Wheel you wish to modify
+                1. Radius
+                2. `Type`
+                """)
+                
+                subProperty = int(input("properties: "))
+                
+                if subProperty == 1:
+                    newRadius = int(input("New Radius: "))
+                    cursor.execute(f"""UPDATE Wheel
+                                SET Radius = ?
+                                WHERE PartID = ?""",
+                                newRadius,Id)
+                elif subProperty == 2:
+                    newType = input("New Type: ")
+                    cursor.execute(f"""UPDATE Wheel
+                                SET `Type` = ?  
+                                WHERE PartID = ?""",
+                                newType,Id)
+            elif ('Motor',) in rows:
+                print(f"""
+                Input the new torque for the motor
+                """)
+            
+                newTorque = input("New Torque: ")
+                cursor.execute(f"""UPDATE Motor
+                            SET Torque = ?  
+                            WHERE PartID = ?""",
+                            newType,Id)
+            elif ('Suspension',) in rows:
+                print(f"""
+                Input the new weight limit for the suspension
+                """)
+            
+                newTorque = input("New Weight Limit: ")
+                cursor.execute(f"""UPDATE Suspension
+                            SET WeightLimit = ?  
+                            WHERE PartID = ?""",
+                            newType,Id)
+            
+        elif "sub-assembly" in entity_type.lower():
+            Id = request.form.get("id")
+            property = int(input("properties: "))
+        
+            print(f"""
+                Input the ID of the Sub-Assembly you wish to modify
+                """)
+            
+            Id = int(input("ID: "))
+            
+            if property == 1:
+                newName = input("New Name: ")
+                cursor.execute(f"""UPDATE `Sub-Assembly`
+                                SET SAName = ?  
+                            WHERE SATypeID = ?""",
+                            newName,Id)
+            elif property == 2:
+                newVersion = int(input("New Version: "))
+                cursor.execute(f"""UPDATE `Sub-Assembly`
+                            SET `Version` = ?
+                            WHERE SATypeID = ?""",
+                            newVersion,Id)
+            elif property == 3:
+                newClassification = input("New SAClassification: ")
+                cursor.execute(f"""UPDATE `Sub-Assembly`
+                            SET SAClassification = ?
+                            WHERE SATypeID = ?""",
+                            newClassification,Id)
+            elif property == 4:
+                newRobotId = int(input("New RobotId: "))
+                cursor.execute(f"""UPDATE `Sub-Assembly`
+                            SET RobotID = ?
+                            WHERE SATypeID = ?""",
+                            newRobotId,Id)
+            
+        elif "robot" in entity_type.lower():
+            
+            Id = request.form.get("id")
+            Id = int(input("ID: "))
+
+            newName = input("New Name: ")
+            cursor.execute(f"""UPDATE Robot
+                            SET RobotName = ?  
+                        WHERE RobotID = ?""",
+                        newName,Id)
+        
+        conn.commit()
+        
+        conn.close()
+        
+        return redirect("")
+    
+    return render_template(
+        "functionality_2.html",
+        item=item,
+        functionalities=FUNCTIONALITIES,
+    )
 
 @app.route("/functionalities/<slug>")
 def functionality_detail(slug: str):
@@ -284,12 +643,11 @@ def functionality_detail(slug: str):
     elif slug in {"modify-records"}:
         related_trigger = TRIGGERS["future-update"]
     return render_template(
-        "functionality_detail.html",
+        "functionality_1.html",
         item=item,
         related_trigger=related_trigger,
         functionalities=FUNCTIONALITIES,
     )
+    
 
 
-if __name__ == "__main__":
-    app.run(debug=True)
