@@ -1,0 +1,61 @@
+<p class="eyebrow">Database results</p>
+<h2>Team lookup results</h2>
+
+{% if lookup_error %}
+  <p class="lead">{{ lookup_error }}</p>
+
+{% elif robot_team_info %}
+  <div class="detail-grid detail-grid-three top-gap">
+    <div class="info-card">
+      <span>Robot ID</span>
+      <strong>{{ robot_team_info.robot_id }}</strong>
+    </div>
+
+    <div class="info-card">
+      <span>Robot Name</span>
+      <strong>{{ robot_team_info.robot_name }}</strong>
+    </div>
+
+    <div class="info-card">
+      <span>Team Name</span>
+      <strong>{{ robot_team_info.team_name }}</strong>
+    </div>
+  </div>
+
+  <div class="detail-grid top-gap">
+    <div class="info-card">
+      <span>Manager</span>
+      <strong>{{ robot_team_info.manager_name }}</strong>
+    </div>
+  </div>
+
+  <div class="top-gap">
+    <h3>Team Members</h3>
+
+    {% if robot_team_members %}
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Member Name</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for member in robot_team_members %}
+            <tr>
+              <td>{{ loop.index }}</td>
+              <td>{{ member }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <p>No team members found.</p>
+    {% endif %}
+  </div>
+
+{% else %}
+  <p class="lead">Enter a Robot ID above to view its team, manager, and team members.</p>
+{% endif %}

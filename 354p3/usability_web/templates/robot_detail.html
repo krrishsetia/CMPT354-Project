@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{ robot.name }} robot</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+  <main class="container detail-page">
+    <a class="back-link" href="{{ url_for('index') }}">← Back to dashboard</a>
+    <section class="detail-hero card">
+      <p class="eyebrow">Robot detail</p>
+      <h1>{{ robot.name }} robot</h1>
+      <p class="lead">{{ robot.summary }}</p>
+      <div class="detail-grid">
+        <div class="info-card"><span>Robot ID</span><strong>{{ robot.id }}</strong></div>
+        <div class="info-card"><span>Team</span><strong>{{ robot.team }}</strong></div>
+        <div class="info-card"><span>Manager</span><strong>{{ robot.manager }}</strong></div>
+        <div class="info-card"><span>Status</span><strong>{{ robot.status }}</strong></div>
+      </div>
+    </section>
+
+    <section class="card">
+      <p class="eyebrow">Linked trigger example</p>
+      <h2>{{ trigger.title }}</h2>
+      <p><strong>Why it matters:</strong> {{ trigger.purpose }}</p>
+      <p><strong>How to present it:</strong> {{ trigger.demo }}</p>
+    </section>
+  </main>
+</body>
+</html>

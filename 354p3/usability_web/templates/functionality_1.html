@@ -1,0 +1,217 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{ item.title }}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+  <main class="container detail-page">
+    <a class="back-link" href="{{ url_for('functionality_index') }}">← Back to all functionality pages</a>
+
+    <section class="card">
+      <p class="eyebrow">{{ item.number }} · {{ item.category }}</p>
+      <h1>{{ item.title }}</h1>
+      <p class="lead">{{ item.description }}</p>
+
+      <form method="POST" action="{{ url_for('functionality_1') }}">
+        <label class="field-card">
+          <span>What are you adding?</span>
+          <select name="entity_type" id="entity-selector" class="button" style="width: 100%; text-align: left;" required>
+            <option value="">-- Select Type --</option>
+            <option value="robot">Robot</option>
+            <option value="sub-assembly">Sub-Assembly</option>
+            <option value="part">Part</option>
+          </select>
+        </label>
+
+        <div id="fields-robot" class="form-grid top-gap" style="display: none;">
+          <label class="field-card">
+            <span>Robot Name</span>
+            <input type="text" name="name" id="robot-name">
+          </label>
+
+          <label class="field-card">
+            <span>Team Name</span>
+            <select name="team_name" id="robot-team-name" class="button" style="width: 100%; text-align: left;">
+              <option value="">-- Select Team --</option>
+              {% for team in teams %}
+                <option value="{{ team[0] }}">{{ team[0] }}</option>
+              {% endfor %}
+            </select>
+          </label>
+
+          <div class="top-gap">
+            <button type="button" id="show-create-team" class="button">Create Team</button>
+          </div>
+
+          <div id="create-team-box" style="display: none;">
+            <label class="field-card">
+              <span>New Team Name</span>
+              <input type="text" name="new_team_name" id="new-team-name">
+            </label>
+          </div>
+        </div>
+
+        <div id="fields-subassembly" class="form-grid top-gap" style="display: none;">
+          <label class="field-card">
+            <span>Sub-Assembly Name</span>
+            <input type="text" name="name" id="subassembly-name">
+          </label>
+
+          <label class="field-card">
+            <span>Version</span>
+            <input type="text" inputmode="numeric" name="version" id="subassembly-version">
+          </label>
+
+          <label class="field-card">
+            <span>Classification</span>
+            <input type="text" name="classification" id="subassembly-classification">
+          </label>
+
+          <label class="field-card">
+            <span>Robot ID</span>
+            <input type="text" inputmode="numeric" name="robot_id" id="subassembly-robot-id">
+          </label>
+        </div>
+
+        <div id="fields-part" class="form-grid top-gap" style="display: none;">
+          <label class="field-card">
+            <span>Part Name</span>
+            <input type="text" name="name" id="part-name">
+          </label>
+
+          <label class="field-card">
+            <span>Weight</span>
+            <input type="text" inputmode="decimal" name="Weight" id="part-weight">
+          </label>
+
+          <label class="field-card">
+            <span>Length</span>
+            <input type="text" inputmode="decimal" name="Length" id="part-length">
+          </label>
+
+          <label class="field-card">
+            <span>Width</span>
+            <input type="text" inputmode="decimal" name="Width" id="part-width">
+          </label>
+
+          <label class="field-card">
+            <span>Height</span>
+            <input type="text" inputmode="decimal" name="Height" id="part-height">
+          </label>
+
+          <label class="field-card">
+            <span>Quantity</span>
+            <input type="text" inputmode="numeric" name="Quantity" id="part-quantity" value="1">
+          </label>
+        </div>
+
+        <div class="top-gap">
+          <button type="submit" class="button">Add Record</button>
+        </div>
+      </form>
+    </section>
+  </main>
+
+  <script>
+    const selector = document.getElementById("entity-selector");
+    const robotFields = document.getElementById("fields-robot");
+    const subassemblyFields = document.getElementById("fields-subassembly");
+    const partFields = document.getElementById("fields-part");
+
+    const robotName = document.getElementById("robot-name");
+    const robotTeamName = document.getElementById("robot-team-name");
+    const newTeamName = document.getElementById("new-team-name");
+    const showCreateTeamBtn = document.getElementById("show-create-team");
+    const createTeamBox = document.getElementById("create-team-box");
+
+    const subassemblyName = document.getElementById("subassembly-name");
+    const subassemblyVersion = document.getElementById("subassembly-version");
+    const subassemblyClassification = document.getElementById("subassembly-classification");
+    const subassemblyRobotId = document.getElementById("subassembly-robot-id");
+
+    const partName = document.getElementById("part-name");
+    const partWeight = document.getElementById("part-weight");
+    const partLength = document.getElementById("part-length");
+    const partWidth = document.getElementById("part-width");
+    const partHeight = document.getElementById("part-height");
+    const partQuantity = document.getElementById("part-quantity");
+
+    function clearRequired() {
+      robotName.required = false;
+      robotTeamName.required = false;
+      newTeamName.required = false;
+
+      subassemblyName.required = false;
+      subassemblyVersion.required = false;
+      subassemblyClassification.required = false;
+      subassemblyRobotId.required = false;
+
+      partName.required = false;
+      partWeight.required = false;
+      partLength.required = false;
+      partWidth.required = false;
+      partHeight.required = false;
+      partQuantity.required = false;
+    }
+
+    function updateFields() {
+      const value = selector.value;
+
+      robotFields.style.display = "none";
+      subassemblyFields.style.display = "none";
+      partFields.style.display = "none";
+
+      clearRequired();
+
+      if (value === "robot") {
+        robotFields.style.display = "grid";
+        robotName.required = true;
+
+        if (createTeamBox.style.display === "none") {
+          robotTeamName.required = true;
+        } else {
+          newTeamName.required = true;
+        }
+      } else if (value === "sub-assembly") {
+        subassemblyFields.style.display = "grid";
+        subassemblyName.required = true;
+        subassemblyVersion.required = true;
+        subassemblyClassification.required = true;
+        subassemblyRobotId.required = true;
+      } else if (value === "part") {
+        partFields.style.display = "grid";
+        partName.required = true;
+        partWeight.required = true;
+        partLength.required = true;
+        partWidth.required = true;
+        partHeight.required = true;
+        partQuantity.required = true;
+      }
+    }
+
+    showCreateTeamBtn.addEventListener("click", function () {
+      const isHidden = createTeamBox.style.display === "none";
+
+      if (isHidden) {
+        createTeamBox.style.display = "block";
+        robotTeamName.value = "";
+        robotTeamName.required = false;
+        newTeamName.required = true;
+        showCreateTeamBtn.textContent = "Use Existing Team";
+      } else {
+        createTeamBox.style.display = "none";
+        newTeamName.value = "";
+        newTeamName.required = false;
+        robotTeamName.required = true;
+        showCreateTeamBtn.textContent = "Create Team";
+      }
+    });
+
+    selector.addEventListener("change", updateFields);
+    updateFields();
+  </script>
+</body>
+</html>

@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{ item.number }} · {{ item.title }}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+  <main class="container detail-page">
+    <a class="back-link" href="{{ url_for('functionality_7') }}">← Back to teams overview</a>
+
+    <section class="card">
+      <p class="eyebrow">{{ item.number }} · Team Detail</p>
+      <h1>{{ robot_team[1] }}</h1>
+      <p class="lead">
+        <strong>Robot ID:</strong> {{ robot_team[0] }}<br>
+        <strong>Team Name:</strong> {{ robot_team[2] }}
+      </p>
+    </section>
+
+    <section class="card">
+      <p class="eyebrow">Managers</p>
+      <h2>Team manager(s)</h2>
+      {% if managers %}
+      <ul>
+        {% for manager in managers %}
+        <li>{{ manager[0] }}</li>
+        {% endfor %}
+      </ul>
+      {% else %}
+      <p>No managers found.</p>
+      {% endif %}
+    </section>
+
+    <section class="card">
+      <p class="eyebrow">Members</p>
+      <h2>Team members</h2>
+      {% if members %}
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Member ID</th>
+              <th>Name</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for member in members %}
+            <tr>
+              <td>{{ member[0] }}</td>
+              <td>{{ member[1] }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+      <p>No team members found.</p>
+      {% endif %}
+    </section>
+
+    <section class="card">
+      <p class="eyebrow">Progress updates</p>
+      <h2>Progress</h2>
+      {% if updates %}
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Description</th>
+              <th>Picture</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for update in updates %}
+            <tr>
+              <td>{{ update[0] }}</td>
+              <td>{{ update[1] }}</td>
+              <td>{{ update[2] }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+      <p>No progress updates found.</p>
+      {% endif %}
+    </section>
+  </main>
+</body>
+</html>

@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>CMPT 354 Usability Demo</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+
+  <header class="hero">
+    <div class="container hero-inner">
+
+      <div>
+        <p class="eyebrow">CMPT 354 · Usability Features</p>
+        <h1>Responsive Robot Project Dashboard</h1>
+
+        <div class="hero-actions">
+          <a class="button primary" href="#robots">View robots</a>
+          <a class="button" href="{{ url_for('functionality_index') }}">
+            Open all functionality pages
+          </a>
+        </div>
+      </div>
+
+      <div class="hero-card">
+        <div class="metric">
+          <span>Total robots</span>
+          <strong>{{ robots|length }}</strong>
+        </div>
+
+        <div class="metric">
+          <span>Function pages</span>
+          <strong>{{ functionalities|length }} linked pages</strong>
+        </div>
+
+        <div class="metric">
+          <span>Integrity logic</span>
+          <strong>Triggers + constraints</strong>
+        </div>
+      </div>
+
+    </div>
+  </header>
+
+  <main class="container page-stack">
+
+    <section class="section" id="robots">
+      <h2>Robot overview</h2>
+
+      <div class="robot-grid">
+        {% for robot in robots %}
+        <article class="robot-card">
+
+          <div>
+            <p>ID #{{ robot.id }} · {{ robot.team }}</p>
+            <h3>{{ robot.name|title }} robot</h3>
+          </div>
+
+          <p>{{ robot.summary }}</p>
+
+          <div>
+            <strong>Manager:</strong> {{ robot.manager }}<br>
+            <strong>Updates:</strong> {{ robot.updates }}
+          </div>
+
+          <div>
+            <a class="button primary"
+               href="{{ url_for('robot_detail', robot_id=robot.id) }}">
+              Open details
+            </a>
+          </div>
+
+        </article>
+        {% endfor %}
+      </div>
+
+    </section>
+
+  </main>
+
+</body>
+</html>

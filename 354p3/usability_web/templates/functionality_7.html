@@ -1,0 +1,221 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{ item.title if item else "Teams" }}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+  <style>
+    .teams-page {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 24px;
+    }
+
+    .teams-title {
+      font-size: 3rem;
+      margin-bottom: 24px;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      margin-bottom: 24px;
+      align-items: start;
+    }
+
+    .form-card {
+      background: #fff;
+      border: 1px solid #d9dee7;
+      border-radius: 16px;
+      padding: 20px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    }
+
+    .form-card h2 {
+      margin-top: 0;
+      margin-bottom: 16px;
+      font-size: 2rem;
+    }
+
+    .form-row {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-bottom: 14px;
+    }
+
+    .form-row label {
+      font-weight: 600;
+    }
+
+    .form-row input,
+    .form-row select {
+      padding: 10px 12px;
+      font-size: 1rem;
+      border: 1px solid #bfc7d4;
+      border-radius: 8px;
+      width: 100%;
+      box-sizing: border-box;
+      background: white;
+    }
+
+    .form-card button {
+      padding: 10px 16px;
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+      cursor: pointer;
+      background: #1f3c88;
+      color: white;
+    }
+
+    .message {
+      margin: 16px 0;
+      padding: 12px 14px;
+      border-radius: 8px;
+      font-weight: 600;
+    }
+
+    .error-message {
+      background: #ffe5e5;
+      color: #9b1c1c;
+      border: 1px solid #f0b4b4;
+    }
+
+    .success-message {
+      background: #e7f7ea;
+      color: #166534;
+      border: 1px solid #b7e3c0;
+    }
+
+    .section-title {
+      margin-top: 28px;
+      margin-bottom: 16px;
+      font-size: 2.2rem;
+    }
+
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+      background: transparent;
+    }
+
+    .data-table th,
+    .data-table td {
+      text-align: left;
+      padding: 16px 14px;
+      border-bottom: 1px solid #d9dee7;
+      vertical-align: middle;
+    }
+
+    .data-table th {
+      font-weight: 700;
+    }
+
+    /* view link blue underline */
+    .view-link {
+      color: blue;
+      text-decoration: underline;
+      font-weight: 500;
+    }
+
+    .view-link:hover {
+      color: darkblue;
+    }
+
+    @media (max-width: 900px) {
+      .form-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="teams-page">
+    <h1 class="teams-title">Teams</h1>
+
+    <div class="form-grid">
+      <section class="form-card">
+        <h2>Add a Team</h2>
+        <form method="POST" action="{{ url_for('functionality_7') }}">
+          <input type="hidden" name="form_type" value="add_team">
+
+          <div class="form-row">
+            <label for="team_name">Team Name</label>
+            <input type="text" id="team_name" name="team_name" required>
+          </div>
+
+          <div class="form-row">
+            <label for="robot_id">Robot ID</label>
+            <input type="number" id="robot_id" name="robot_id" required>
+          </div>
+
+          <button type="submit">Add Team</button>
+        </form>
+      </section>
+
+      <section class="form-card">
+        <h2>Add a Team Member</h2>
+        <form method="POST" action="{{ url_for('functionality_7') }}">
+          <input type="hidden" name="form_type" value="add_member">
+
+          <div class="form-row">
+            <label for="member_name">Member Name</label>
+            <input type="text" id="member_name" name="member_name" required>
+          </div>
+
+          <div class="form-row">
+            <label for="member_team_name">Team Name</label>
+            <select id="member_team_name" name="member_team_name" required>
+              <option value="">-- Select a team --</option>
+              {% for team in team_names %}
+                <option value="{{ team[0] }}">{{ team[0] }}</option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <button type="submit">Add Team Member</button>
+        </form>
+      </section>
+    </div>
+
+    {% if error %}
+      <div class="message error-message">{{ error }}</div>
+    {% endif %}
+
+    {% if success %}
+      <div class="message success-message">{{ success }}</div>
+    {% endif %}
+
+    <h2 class="section-title">Current Teams</h2>
+
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Robot ID</th>
+          <th>Robot Name</th>
+          <th>Team Name</th>
+          <th>Details</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for row in rows %}
+        <tr>
+          <td>{{ row[0] }}</td>
+          <td>{{ row[1] }}</td>
+          <td>{{ row[2] }}</td>
+          <td>
+            <!-- make it a clickable link -->
+            <a class="view-link" href="{{ url_for('functionality_7_detail', robot_id=row[0]) }}">
+              View
+            </a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </main>
+</body>
+</html>

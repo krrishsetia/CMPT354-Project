@@ -1,0 +1,199 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{ item.number }} · {{ item.title }}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+
+  <!-- ✅ small alignment fix (safe, local only) -->
+  <style>
+    .data-table {
+      width: 100%;
+      table-layout: auto;
+      border-collapse: collapse;
+    }
+
+    .data-table th,
+    .data-table td {
+      text-align: left;
+      padding: 10px 12px;
+      vertical-align: middle;
+      white-space: nowrap;
+    }
+
+    .data-table tr {
+      border-bottom: 1px solid #e5e7eb;
+    }
+  </style>
+</head>
+
+<body>
+  <main class="container detail-page">
+    <a class="back-link" href="{{ url_for('functionality_index') }}">
+      ← Back to all functionality pages
+    </a>
+
+    <section class="card">
+      <p class="eyebrow">{{ item.number }} · {{ item.category }}</p>
+      <h1>{{ item.title }}</h1>
+      <p class="lead">{{ item.description }}</p>
+
+      <!-- ================= FORM ================= -->
+      <form method="get" action="{{ url_for('functionality_8') }}">
+        <div class="form-grid">
+          <div>
+            <label for="entity_type">Entity Type</label>
+            <select name="entity_type" id="entity_type" onchange="updateIdentifierField()">
+              <option value="">Select one</option>
+              <option value="robot" {% if entity_type == "robot" %}selected{% endif %}>Robot</option>
+              <option value="sub-assembly" {% if entity_type == "sub-assembly" %}selected{% endif %}>Sub-Assembly</option>
+            </select>
+          </div>
+
+          <div>
+            <label id="identifier-label" for="identifier">
+              RobotID / RobotName / SATypeID / SAName
+            </label>
+            <input
+              type="text"
+              id="identifier"
+              name="identifier"
+              value="{{ identifier }}"
+            >
+          </div>
+        </div>
+
+        <div style="margin-top: 1rem;">
+          <button type="submit">Search</button>
+        </div>
+      </form>
+
+      {% if error %}
+        <p class="lead" style="color: red; margin-top: 1rem;">{{ error }}</p>
+      {% endif %}
+
+      <!-- ================= ROBOT ================= -->
+      {% if entity_type == "robot" %}
+        <hr>
+        <h3>Robot Progress Updates</h3>
+
+        {% if history %}
+          <div class="table-wrap">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Robot ID</th>
+                  <th>Date</th>
+                  <th>Description</th>
+                  <th>Picture</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for row in history %}
+                <tr>
+                  <td>{{ row[0] }}</td>
+                  <td>{{ row[1] }}</td>
+                  <td>{{ row[2] }}</td>
+                  <td>{{ row[3] }}</td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        {% elif identifier and not error %}
+          <p>No progress updates found.</p>
+        {% else %}
+          <p>Search for a robot to view progress history.</p>
+        {% endif %}
+      {% endif %}
+
+      <!-- ================= SUB-ASSEMBLY ================= -->
+      {% if entity_type == "sub-assembly" %}
+        <hr>
+        <h3>Current Sub-Assembly Info</h3>
+
+        {% if current_info %}
+          <div class="table-wrap">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Sub-Assembly ID</th>
+                  <th>Name</th>
+                  <th>Current Version</th>
+                  <th>Classification</th>
+                  <th>Robot ID</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>{{ current_info[0] }}</td>
+                  <td>{{ current_info[1] }}</td>
+                  <td>{{ current_info[2] }}</td>
+                  <td>{{ current_info[3] }}</td>
+                  <td>{{ current_info[4] }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <h3 style="margin-top: 1.5rem;">Sub-Assembly Version History</h3>
+
+          {% if history %}
+            <div class="table-wrap">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Version</th>
+                    <th>Description</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for row in history %}
+                  <tr>
+                    <td>{{ row[1] }}</td>
+                    <td>{{ row[2] }}</td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          {% else %}
+            <p>No version history found.</p>
+          {% endif %}
+
+        {% elif identifier and not error %}
+          <p>No sub-assembly info found.</p>
+        {% else %}
+          <p>Search for a sub-assembly to view version history.</p>
+        {% endif %}
+      {% endif %}
+
+    </section>
+  </main>
+
+  <!-- ================= SCRIPT ================= -->
+  <script>
+    function updateIdentifierField() {
+      var entityType = document.getElementById("entity_type");
+      var label = document.getElementById("identifier-label");
+      var input = document.getElementById("identifier");
+
+      if (!entityType || !label || !input) return;
+
+      if (entityType.value === "robot") {
+        label.textContent = "RobotID / RobotName";
+        input.placeholder = "Enter RobotID or RobotName";
+      } else if (entityType.value === "sub-assembly") {
+        label.textContent = "SATypeID / SAName";
+        input.placeholder = "Enter SATypeID or SAName";
+      } else {
+        label.textContent = "RobotID / RobotName / SATypeID / SAName";
+        input.placeholder = "";
+      }
+    }
+
+    document.addEventListener("DOMContentLoaded", updateIdentifierField);
+  </script>
+</body>
+</html>

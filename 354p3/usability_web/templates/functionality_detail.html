@@ -1,0 +1,192 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{ item.number }} · {{ item.title }}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+  <main class="container detail-page">
+
+    <a class="back-link" href="{{ url_for('functionality_index') }}">
+      ← Back to all functionality pages
+    </a>
+
+    <section class="card">
+      <p class="eyebrow">{{ item.number }} · {{ item.category }}</p>
+      <h1>{{ item.title }}</h1>
+      <p class="lead">{{ item.description }}</p>
+
+      <div class="detail-grid detail-grid-three">
+        <div class="info-card">
+          <span>Status</span>
+          <strong>Ready</strong>
+        </div>
+        <div class="info-card">
+          <span>Backend</span>
+          <strong>
+            {% if item.slug == "inventory" %}
+              Connected
+            {% else %}
+              Placeholder / in progress
+            {% endif %}
+          </strong>
+        </div>
+        <div class="info-card">
+          <span>Demo use</span>
+          <strong>{{ item.demo_note }}</strong>
+        </div>
+      </div>
+    </section>
+
+    {% if item.slug == "inventory" %}
+    <section class="card">
+      <p class="eyebrow">Inventory overview</p>
+      <h2>Low Quantity Parts</h2>
+
+      {% if low_parts %}
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Part ID</th>
+              <th>Part Name</th>
+              <th>Quantity</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for row in low_parts %}
+            <tr>
+              <td>{{ row[0] }}</td>
+              <td>{{ row[1] }}</td>
+              <td>{{ row[2] }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+      <p>No low-quantity parts found.</p>
+      {% endif %}
+    </section>
+
+    <section class="card">
+      <p class="eyebrow">Inventory filter</p>
+      <h2>Filter Parts</h2>
+
+      <form method="GET" action="{{ url_for('functionality_detail', slug=item.slug) }}">
+        <div class="form-grid">
+
+          <label class="field-card">
+            <span>Subtype</span>
+            <select name="subtype" onchange="this.form.submit()">
+              <option value="" {% if not subtype %}selected{% endif %}>All Parts</option>
+              <option value="electronic" {% if subtype == "electronic" %}selected{% endif %}>Electronic</option>
+              <option value="mechanical" {% if subtype == "mechanical" %}selected{% endif %}>Mechanical</option>
+              <option value="structural" {% if subtype == "structural" %}selected{% endif %}>Structural</option>
+            </select>
+          </label>
+
+          {% if subtype == "mechanical" %}
+          <label class="field-card">
+            <span>Mechanical Type</span>
+            <select name="mech_type">
+              <option value="" {% if not mech_type %}selected{% endif %}>All Mechanical</option>
+              <option value="wheel" {% if mech_type == "wheel" %}selected{% endif %}>Wheel</option>
+              <option value="motor" {% if mech_type == "motor" %}selected{% endif %}>Motor</option>
+              <option value="suspension" {% if mech_type == "suspension" %}selected{% endif %}>Suspension</option>
+            </select>
+          </label>
+          {% endif %}
+
+        </div>
+
+        <div class="hero-actions top-gap">
+          <button class="button primary" type="submit">Apply Filter</button>
+        </div>
+      </form>
+    </section>
+
+    <section class="card" id="dataset">
+      <p class="eyebrow">Filtered inventory</p>
+      <h2>Inventory Parts</h2>
+
+      {% if parts %}
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Part ID</th>
+              <th>Part Name</th>
+              <th>Quantity</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for row in parts %}
+            <tr>
+              <td>{{ row[0] }}</td>
+              <td>{{ row[1] }}</td>
+              <td>{{ row[2] }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+      <p>No parts found for the selected filter.</p>
+      {% endif %}
+    </section>
+
+    {% else %}
+    <section class="card">
+      <p class="eyebrow">Planned inputs</p>
+      <h2>Form layout</h2>
+
+      <div class="form-grid">
+        {% for field in item.dummy_fields %}
+        <label class="field-card">
+          <span>{{ field }}</span>
+          <input type="text" value="Dummy value" readonly>
+        </label>
+        {% endfor %}
+      </div>
+
+      <div class="hero-actions top-gap">
+        <a class="button primary" href="#">Submit placeholder</a>
+        <a class="button" href="#dataset">View dummy data</a>
+      </div>
+    </section>
+
+    <section class="card" id="dataset">
+      <p class="eyebrow">Dummy dataset</p>
+      <h2>Preview table</h2>
+
+      <div class="table-wrap">
+        <table class="data-table">
+          <tbody>
+            {% for row in item.dummy_rows %}
+            <tr>
+              {% for value in row %}
+              <td>{{ value }}</td>
+              {% endfor %}
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </section>
+    {% endif %}
+
+    {% if related_trigger %}
+    <section class="card">
+      <p class="eyebrow">Related integrity logic</p>
+      <h2>{{ related_trigger.title }}</h2>
+      <p><strong>Why it matters:</strong> {{ related_trigger.purpose }}</p>
+      <p><strong>How to demo it later:</strong> {{ related_trigger.demo }}</p>
+    </section>
+    {% endif %}
+
+  </main>
+</body>
+</html>
