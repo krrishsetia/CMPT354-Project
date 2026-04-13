@@ -1,0 +1,22 @@
+{% if update_success %}
+  <div class="result-success">
+    <p>Name updated successfully.</p>
+    <div class="table-wrap">
+      <table class="data-table">
+        <thead><tr><th>Before</th><th>After</th></tr></thead>
+        <tbody>
+          <tr>
+            <td>{{ update_old_name }}</td>
+            <td>{{ update_new_name }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <p>Note: if you try a name that already exists, the robot-name-guard trigger will reject it.</p>
+    <a class="button" href="{{ url_for('functionality_detail', slug='modify-records') }}">Update another</a>
+  </div>
+{% elif update_error %}
+  <p class="result-error">Error: {{ update_error }}</p>
+{% else %}
+  <p>Select a robot and enter a new name above.</p>
+{% endif %}

@@ -1,0 +1,47 @@
+{% if delete_success %}
+
+{% elif delete_preview %}
+  <div class="result-warn">
+    <p><strong>Warning: about to delete "{{ delete_preview.robot_name }}" (ID {{ delete_preview.robot_id }})</strong></p>
+    <p>The following will also be deleted due to cascade:</p>
+    <ul>
+      <li>Team: {{ delete_preview.teams | join(', ') or 'none' }}</li>
+      <li>Team members ({{ delete_preview.members | length }}):
+        {% for m in delete_preview.members %}{{ m[1] }}{% if not loop.last %}, {% endif %}{% endfor %}
+      </li>
+      <li>Sub-assemblies ({{ delete_preview.sub_assemblies | length }}):
+        {% for sa in delete_preview.sub_assemblies %}{{ sa[1] }} v{{ sa[2] }}{% if not loop.last %}, {% endif %}{% endfor %}
+      </li>
+      <li>Progress updates: {{ delete_preview.progress_count }}</li>
+      <li>A RobotDeleteAudit row will be inserted by the trigger before deletion</li>
+    </ul>
+    <div class="hero-actions">
+      <a class="button button-danger"
+         href="{{ url_for('functionality_detail', slug='delete-records', robot_id=delete_preview.robot_id, confirm='yes') }}">
+        Confirm Delete
+      </a>
+      <a class="button" href="{{ url_for('functionality_detail', slug='delete-records') }}">Cancel</a>
+    </div>
+  </div>
+
+{% else %}
+  <form method="get" action="{{ url_for('functionality_detail', slug='delete-records') }}">
+    <label class="field-card">
+      <span>Select robot to delete</span>
+      <select name="robot_id" required>
+        <option value="">-- select --</option>
+        {% for r in all_robots_for_delete %}
+          <option value="{{ r[0] }}">{{ r[0] }} - {{ r[1] }}</option>
+        {% endfor %}
+      </select>
+    </label>
+    <br>
+    <div class="hero-actions">
+      <button class="button button-danger" type="submit">Preview Delete</button>
+    </div>
+  </form>
+
+  {% if delete_error %}
+    <p class="result-error">{{ delete_error }}</p>
+  {% endif %}
+{% endif %}

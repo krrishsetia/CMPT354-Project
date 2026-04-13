@@ -1,0 +1,30 @@
+{% if division_error %}
+  <p class="lead" style="color: red;">{{ division_error }}</p>
+{% endif %}
+
+{% if division_results %}
+  <div class="table-wrap">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Robot ID</th>
+          <th>Robot Name</th>
+          <th>Matched Required Parts</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for row in division_results %}
+        <tr>
+          <td>{{ row[0] }}</td>
+          <td>{{ row[1] }}</td>
+          <td>{{ row[2] }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+{% elif required_parts_raw %}
+  <p>No robots matched all of the required parts.</p>
+{% else %}
+  <p>Enter a comma-separated set of Part IDs to run the division query.</p>
+{% endif %}

@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{ item.number }} · {{ item.title }}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+  <main class="container detail-page">
+    <a class="back-link" href="{{ url_for('functionality_index') }}">← Back to all functionality pages</a>
+
+    <section class="card">
+      <p class="eyebrow">{{ item.number }} · {{ item.category }}</p>
+      <h1>{{ item.title }}</h1>
+      <p class="lead">{{ item.description }}</p>
+      <div class="detail-grid detail-grid-three">
+        <div class="info-card"><span>Status</span><strong>Placeholder ready</strong></div>
+        <div class="info-card"><span>Backend</span><strong>Dummy data for now</strong></div>
+        <div class="info-card"><span>Demo use</span><strong>{{ item.demo_note }}</strong></div>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="form-grid">
+        {% if item.slug == "parts-by-type" %}
+          {% include "f6_templates/f6_form.html" %}
+
+        {% elif item.slug == "team-for-robot" %}
+          {% include "f7_templates/f7_form.html" %}
+
+        {% elif item.slug == "version-history" %}
+          {% include "f8_templates/f8_form.html" %}
+
+        {% elif item.slug == "aggregation-reports" %}
+          {% include "f9_templates/f9_form.html" %}
+
+        {% elif item.slug == "division-query" %}
+          {% include "division_templates/division_form.html" %}
+
+        {% elif item.slug == "modify-records" %}
+          {% include "update_templates/update_form.html" %}
+
+        {% elif item.slug == "delete-records" %}
+          {% include "delete_templates/delete_form.html" %}
+
+        {% else %}
+          {% for field in item.dummy_fields %}
+            <label class="field-card">
+              <span>{{ field }}</span>
+              <input type="text" value="Dummy value" readonly>
+            </label>
+          {% endfor %}
+        {% endif %}
+      </div>
+
+      <div class="hero-actions top-gap">
+        <a class="button" href="#dataset">View data</a>
+      </div>
+    </section>
+
+    <section class="card" id="dataset">
+      {% if item.slug == "parts-by-type" %}
+        <p class="eyebrow">Database results</p>
+        <h2>Preview table</h2>
+         {% include "f6_templates/f6_results.html" %}
+
+      {% elif item.slug == "team-for-robot" %}
+        <p class="eyebrow">Database results</p>
+        <h2>Preview table</h2>
+        {% include "f7_templates/f7_results.html" %}
+
+      {% elif item.slug == "version-history" %}
+        <p class="eyebrow">Database results</p>
+        <h2>Preview table</h2>
+        {% include "f8_templates/f8_results.html" %}
+
+      {% elif item.slug == "aggregation-reports" %}
+        <p class="eyebrow">Database results</p>
+        <h2>Preview table</h2>
+        {% include "f9_templates/f9_results.html" %}
+
+      {% elif item.slug == "division-query" %}
+        <p class="eyebrow">Database results</p>
+        <h2>Preview table</h2>
+        {% include "division_templates/division_results.html" %}
+
+      {% elif item.slug == "modify-records" %}
+        <p class="eyebrow">Update result</p>
+        <h2>Result</h2>
+        {% include "update_templates/update_results.html" %}
+
+      {% elif item.slug == "delete-records" %}
+        <p class="eyebrow">Delete result</p>
+        <h2>Result</h2>
+        {% include "delete_templates/delete_results.html" %}
+
+      {% else %}
+        <p class="eyebrow">Dummy dataset</p>
+        <h2>Preview table</h2>
+        <div class="table-wrap">
+          <table class="data-table">
+            <tbody>
+              {% for row in item.dummy_rows %}
+              <tr>
+                {% for value in row %}
+                <td>{{ value }}</td>
+                {% endfor %}
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      {% endif %}
+    </section>
+
+    {% if related_trigger %}
+    <section class="card">
+      <p class="eyebrow">Related integrity logic</p>
+      <h2>{{ related_trigger.title }}</h2>
+      <p><strong>Why it matters:</strong> {{ related_trigger.purpose }}</p>
+      <p><strong>How to demo it later:</strong> {{ related_trigger.demo }}</p>
+    </section>
+    {% endif %}
+  </main>
+</body>
+</html>

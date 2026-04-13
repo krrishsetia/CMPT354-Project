@@ -1,0 +1,24 @@
+<div class="table-wrap">
+  {% if parts %}
+    <table class="data-table">
+      <thead>
+        <tr>
+          {% for key in parts[0].keys() %}
+            <th>{{ key }}</th>
+          {% endfor %}
+        </tr>
+      </thead>
+      <tbody>
+        {% for part in parts %}
+          <tr>
+            {% for value in part.values() %}
+              <td>{{ value if value is not none else "N/A" }}</td>
+            {% endfor %}
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% else %}
+    <p>No matching parts found.</p>
+  {% endif %}
+</div>

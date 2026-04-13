@@ -1,0 +1,18 @@
+<p class="eyebrow">Lookup form</p>
+<h2>Find team for a robot</h2>
+
+<form method="get" class="stack-gap">
+  <label class="field-card">
+    <span>Robot ID or Robot Name</span>
+    <input
+      type="text"
+      name="robot_id"
+      placeholder="Enter Robot ID or Robot Name"
+      value="{{ request.args.get('robot_id', '') }}"
+    >
+  </label>
+
+  <div class="hero-actions">
+    <button class="button" type="submit">Search</button>
+  </div>
+</form>

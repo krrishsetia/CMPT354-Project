@@ -1,0 +1,102 @@
+{% if error %}
+  <p class="lead" style="color: red;">{{ error }}</p>
+{% endif %}
+
+{% if item.slug == "version-history" and entity_type == "robot" %}
+  <h3>Robot Progress Updates</h3>
+
+  {% if history %}
+    <div class="table-wrap">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>RobotID</th>
+            <th>Progress Update</th>
+            <th>Image</th>
+            <th>Date</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for row in history %}
+          <tr>
+            <td>{{ row[0] }}</td>
+            <td>{{ row[2] }}</td>
+            <td>
+              {% if row[3] %}
+                {{ row[3] }}
+              {% else %}
+                No image
+              {% endif %}
+            </td>
+            <td>{{ row[1] }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% elif identifier %}
+    <p>No progress updates found.</p>
+  {% else %}
+    <p>Search for a robot to view progress history.</p>
+  {% endif %}
+{% endif %}
+
+{% if item.slug == "version-history" and entity_type == "subassembly" %}
+  <h3>Current Sub-assembly Info</h3>
+
+  {% if subassembly_info %}
+    <div class="table-wrap">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>SATypeID</th>
+            <th>SAName</th>
+            <th>Version</th>
+            <th>SAClassification</th>
+            <th>RobotID</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>{{ subassembly_info[0] }}</td>
+            <td>{{ subassembly_info[1] }}</td>
+            <td>{{ subassembly_info[2] }}</td>
+            <td>{{ subassembly_info[3] }}</td>
+            <td>{{ subassembly_info[4] }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  {% endif %}
+
+  <h3 class="top-gap">Sub-assembly Version History</h3>
+
+  {% if history %}
+    <div class="table-wrap">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>SATypeID</th>
+            <th>Version</th>
+            <th>Description</th>
+            <th>ChangeDate</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for row in history %}
+          <tr>
+            <td>{{ row[0] }}</td>
+            <td>{{ row[1] }}</td>
+            <td>{{ row[2] }}</td>
+            <td>{{ row[3] }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% elif identifier %}
+    <p>No version history found.</p>
+  {% else %}
+    <p>Search for a sub-assembly to view version history.</p>
+  {% endif %}
+{% endif %}

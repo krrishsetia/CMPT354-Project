@@ -1,0 +1,31 @@
+<form method="get" action="{{ url_for('functionality_detail', slug='aggregation-reports') }}">
+  <div class="form-section">
+    <label for="subtype">Choose subtype:</label>
+    <select name="subtype" id="subtype" onchange="toggleF9Options()">
+      <option value="">-- Select subtype --</option>
+      <option value="electronic" {% if subtype == "electronic" %}selected{% endif %}>electronic</option>
+      <option value="mechanical" {% if subtype == "mechanical" %}selected{% endif %}>mechanical</option>
+      <option value="structural" {% if subtype == "structural" %}selected{% endif %}>structural</option>
+    </select>
+  </div>
+
+  <div id="mech-section" style="display: {% if subtype == 'mechanical' %}block{% else %}none{% endif %};">
+    <label for="mech_type">Mechanical type:</label>
+    <select name="mech_type" id="mech_type">
+      <option value="">-- All mechanical --</option>
+      <option value="wheel" {% if mech_type == "wheel" %}selected{% endif %}>wheel</option>
+      <option value="motor" {% if mech_type == "motor" %}selected{% endif %}>motor</option>
+      <option value="suspension" {% if mech_type == "suspension" %}selected{% endif %}>suspension</option>
+    </select>
+  </div>
+
+  <button type="submit">Filter Parts</button>
+</form>
+
+<script>
+function toggleF9Options() {
+  const subtype = document.getElementById("subtype").value;
+  const mechSection = document.getElementById("mech-section");
+  mechSection.style.display = (subtype === "mechanical") ? "block" : "none";
+}
+</script>

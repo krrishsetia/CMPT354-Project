@@ -1,0 +1,18 @@
+<p class="eyebrow">Division query</p>
+<h2>Find robots that have all required parts</h2>
+
+<form method="get" class="stack-gap">
+  <label class="field-card">
+    <span>Required Part IDs</span>
+    <input
+      type="text"
+      name="required_parts"
+      placeholder="Example: 101,118,205"
+      value="{{ required_parts_raw }}"
+    >
+  </label>
+
+  <div class="hero-actions">
+    <button class="button" type="submit">Run division query</button>
+  </div>
+</form>

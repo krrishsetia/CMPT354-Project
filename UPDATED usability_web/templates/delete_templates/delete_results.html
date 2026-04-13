@@ -1,0 +1,32 @@
+{% if delete_success %}
+  <div class="result-success">
+    <p>Robot deleted. All related rows were removed by cascade.</p>
+
+    {% if delete_audit %}
+    <p><strong>RobotDeleteAudit row (created by trigger before delete):</strong></p>
+    <div class="table-wrap">
+      <table class="data-table">
+        <thead>
+          <tr><th>AuditID</th><th>RobotID</th><th>RobotName</th><th>DeletedAt</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>{{ delete_audit.audit_id }}</td>
+            <td>{{ delete_audit.robot_id }}</td>
+            <td>{{ delete_audit.robot_name }}</td>
+            <td>{{ delete_audit.deleted_at }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    {% endif %}
+
+    <a class="button" href="{{ url_for('functionality_detail', slug='delete-records') }}">Delete another</a>
+  </div>
+
+{% elif delete_preview %}
+  <p>Review the cascade impact above and confirm.</p>
+
+{% else %}
+  <p>Select a robot above to see what will be deleted before confirming.</p>
+{% endif %}

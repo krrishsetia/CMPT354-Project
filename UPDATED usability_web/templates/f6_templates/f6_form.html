@@ -1,0 +1,23 @@
+<form method="GET">
+  <label class="field-card">
+    <span>Subtype filter</span>
+    <select name="subtype" onchange="this.form.submit()">
+      <option value="">Select type</option>
+      <option value="electronic" {% if subtype == "electronic" %}selected{% endif %}>Electronic</option>
+      <option value="mechanical" {% if subtype == "mechanical" %}selected{% endif %}>Mechanical</option>
+      <option value="structural" {% if subtype == "structural" %}selected{% endif %}>Structural</option>
+    </select>
+  </label>
+
+  {% if subtype == "mechanical" %}
+  <label class="field-card">
+    <span>Mechanical subtype</span>
+    <select name="mech_type" onchange="this.form.submit()">
+      <option value="">All</option>
+      <option value="wheel" {% if mech_type == "wheel" %}selected{% endif %}>Wheel</option>
+      <option value="motor" {% if mech_type == "motor" %}selected{% endif %}>Motor</option>
+      <option value="suspension" {% if mech_type == "suspension" %}selected{% endif %}>Suspension</option>
+    </select>
+  </label>
+  {% endif %}
+</form>

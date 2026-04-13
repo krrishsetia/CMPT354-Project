@@ -1,0 +1,26 @@
+{% if not update_success %}
+<form method="get" action="{{ url_for('functionality_detail', slug='modify-records') }}">
+  <label class="field-card">
+    <span>Select robot</span>
+    <select name="robot_id" required>
+      <option value="">-- select --</option>
+      {% for r in all_robots_for_update %}
+        <option value="{{ r[0] }}" {% if request.args.get('robot_id') == r[0]|string %}selected{% endif %}>
+          {{ r[0] }} - {{ r[1] }}
+        </option>
+      {% endfor %}
+    </select>
+  </label>
+  <br>
+  <label class="field-card">
+    <span>New name</span>
+    <input type="text" name="new_name"
+           placeholder="e.g. car-mk2"
+           value="{{ request.args.get('new_name', '') }}">
+  </label>
+  <br>
+  <div class="hero-actions">
+    <button class="button" type="submit">Update Name</button>
+  </div>
+</form>
+{% endif %}
