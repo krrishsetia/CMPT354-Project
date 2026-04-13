@@ -113,19 +113,21 @@ def f9_parts_grouped_by_category_q(cursor):
                 WHEN st.PartID IS NOT NULL THEN 'Structural'
                 ELSE 'Other'
             END AS PartCategory,
-            COUNT(p.PartID)    AS TotalParts,
-            SUM(p.Quantity)    AS TotalQuantity,
-            AVG(p.Quantity)    AS AvgQuantity,
-            MIN(p.Quantity)    AS MinQuantity,
-            MAX(p.Quantity)    AS MaxQuantity
+            COUNT(p.PartID) AS TotalParts,
+            SUM(p.Quantity) AS TotalQty,
+            AVG(p.Quantity) AS AvgQty,
+            MIN(p.Quantity) AS MinQty,
+            MAX(p.Quantity) AS MaxQty
         FROM part p
-        LEFT JOIN electronic  e  ON p.PartID = e.PartID
-        LEFT JOIN battery     b  ON p.PartID = b.PartID
-        LEFT JOIN wheel       w  ON p.PartID = w.PartID
-        LEFT JOIN motor       mo ON p.PartID = mo.PartID
-        LEFT JOIN suspension  s  ON p.PartID = s.PartID
-        LEFT JOIN structural  st ON p.PartID = st.PartID
+        LEFT JOIN electronic e ON p.PartID = e.PartID
+        LEFT JOIN battery b ON p.PartID = b.PartID
+        LEFT JOIN wheel w ON p.PartID = w.PartID
+        LEFT JOIN motor mo ON p.PartID = mo.PartID
+        LEFT JOIN suspension s ON p.PartID = s.PartID
+        LEFT JOIN structural st ON p.PartID = st.PartID
         GROUP BY PartCategory
         ORDER BY PartCategory
     """)
-    return cursor.fetchall()
+    rows = cursor.fetchall()
+    print("grouped rows =", rows)
+    return rows
